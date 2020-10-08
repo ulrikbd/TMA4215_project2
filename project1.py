@@ -95,12 +95,12 @@ class NeuralNetwork():
         return self.P[k + 1] + self.h*np.transpose(self.W[k]) @ (self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) * self.P[k+1])
 
 
-    def dJ_dWk(self, k, P_kp1):
-        return self.h*(P_kp1 * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
+    def dJ_dWk(self, k):
+        return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
 
-    def dJ_dbk(self):
+    def dJ_dbk(self, k):
         s = np.shape(self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]))
-        return self.h*(P_kp1 * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.ones(s))
+        return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.ones(s))
 
     def dJ_dw(self, yps):
         Z_K = self.Z[-1]
