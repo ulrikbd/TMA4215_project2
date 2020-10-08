@@ -12,6 +12,7 @@ class NeuralNetwork():
         self.tau = tau
         self.h = h
         self.y0 = y0
+        self.I = len(y0)
         self.d = d
         self.d0 = np.ndim(y0)
         self.W = np.random.randn(self.K, self.d, self.d)
@@ -21,21 +22,28 @@ class NeuralNetwork():
         self.c = c
         self.Z = None
         self.yps = None
+        self.P = None
 
 
     def embed_1D(self):
-        y = np.zeros(shape=(self.d, len(self.y0)))
+        y = np.zeros(shape=(self.d, self.I))
         y[0] = self.y0
         self.y0 = y
 
     def initialize_Z(self):
-        self.Z = np.zeros(shape=(self.K, self.d, len(self.y0[0])))
+        self.Z = np.zeros(shape=(self.K, self.d, self.I))
         self.Z[0] = self.y0
         for k in range(1, self.K):
-            self.Z[k] = self.get_Z_kp1(self.Z[k - 1], k - 1)
+            self.Z[k] = self.get_Z_kp1(k - 1)
 
     def initialize_yps(self):
-        self.yps = self.hypothesis_function(np.transpose(self.Z[-1])@self.w + np.ones(len(self.y0))*self.mu)
+        self.yps = self.hypothesis_function(np.transpose(self.Z[-1])@self.w + np.ones((self.I, 1))*self.mu)
+
+    def initialize_P(self):
+        self.P = np.zeros(shape=(self.K, self.d, self.I))
+        self.P[-1] = self.w @ np.transpose(np.multiply((self.yps - self.c), self.hypothesis_function_derivated(np.transpose(self.Z[-1]) @ self.w + self.mu*np.ones((self.I, 1)))))
+        for k in range(K - 2, -1, -1):
+            self.P[k] = self.get_P_km1(k)
 
 
     def activation_function(self, x):
@@ -54,17 +62,11 @@ class NeuralNetwork():
         return 1/(2 + 2*np.cosh(x))
 
     def transformation(self, y, k):
-<<<<<<< HEAD
-         return y + self.h*self.activation_function(self.W[k]@y + self.b[k])
-
-    def get_Z_kp1(self, Z_k, k):
-        return self.transformation(Z_k, k)
-=======
-         return y + self.h*self.activation_function(self.W[k] @ y + self.b[k])
+        return y + self.h*self.activation_function(self.W[k] @ y + self.b[k])
 
     def get_Z_kp1(self, k):
         return self.transformation(self.Z[k], k)
->>>>>>> ad893a2dc86aca3c5a5390ef894b53ea176bb7f7
+
 
     def scale_y0(self):
         a = np.min(self.y0)
@@ -84,15 +86,14 @@ class NeuralNetwork():
         print("K:", self.K)
         print("tau:", self.tau)
         print("d0", self.d0)
+        print("I:", self.I)
         print("y0:", self.y0)
         print("c:", self.c)
         print("Z:", self.Z)
         print("yps:", self.yps)
 
-    def get_P_km1(self, Y_k, P_k, k):
-        # Y is the vector of function values from the last layer.
-        #P[self.K] = w*(Y-c)* hypothesis_function_derivated(Z[K])
-        return P_k + self.h*np.transpose(self.W[k-1]) @ (self.activation_function_derivated(self.W[k-1] @ self.Z[k-1] + self.b[k-1]) * P_k)
+    def get_P_km1(self, k):
+        return self.P[k + 1] + self.h*np.transpose(self.W[k]) @ (self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) * self.P[k+1])
 
     def dJ_dWk(self, k, P_kp1):
         return self.h*(P_kp1 * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
@@ -111,31 +112,34 @@ class NeuralNetwork():
         s = np.shape(np.transpose(Z_K) @ self.w)
         return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu @ np.ones(np.shape(s)))) @ (Y-self.c)
 
-    def adam_decent(self):
-        beta1 = 0.9
-        beta2 = 0.999
-        alpha = 0.01
-        e = 10**(-8)
-        v0 = np.zeros(2*self.K) #??
-        v0 = np.zeros(2*self.K) #??
-        for j in range(1,K):
-            gj =
-            m[j] = beta1*m[j-1] + (1-beta1)*gj
+def adam_descent_step(U, dU, j, m, v):
+    beta_1 = 0.9
+    beta_2 = 0.999
+    alpha = 0.01
+    eps = 10**(-8)
+    g = dU
+    m = beta_1 * m + (1 - beta_1) * g
+    v = beta_2 * v + (1 - beta_2) * (g * g)
+    m_hat = m/(1 - beta_1**j)
+    v_hat = v/(1 - beta_2**j)
+    U = U - alpha*m_hat/(np.sqrt(v_hat) + eps)
+    return U, m, v
 
 
-
-
-y0 = np.random.uniform(-2, 2, 20)
+I = 20
+y0 = np.random.uniform(-2, 2, I)
 K = 3
 h = 0.5
 d = 2
 tau = 0.5
 F = lambda y: 1/2*y**2
 c = F(y0)
+c = c.reshape((I, 1))
 network = NeuralNetwork(K, tau, h, y0, d, c)
 network.scale_input()
 network.embed_1D()
 
 network.initialize_Z()
 network.initialize_yps()
-network.printparameters()
+network.initialize_P()
+print(network.P)
