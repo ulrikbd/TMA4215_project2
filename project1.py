@@ -20,6 +20,12 @@ class NeuralNetwork():
         self.mu = np.random.randn(1)
         self.c = c
 
+
+    def embed_1D(self):
+        y = np.zeros(shape=(len(self.y0), len(self.y0)))
+        y[0] = self.y0
+        self.y0 = y
+
     def activation_function(self, x):
         return np.tanh(x)
 
@@ -60,8 +66,7 @@ tau = 0.5
 F = lambda y: 1/2*y**2
 c = F(y0)
 network = NeuralNetwork(K, tau, h, y0, d, c)
-network.printparameters()
 network.scale_input()
+network.embed_1D()
 network.printparameters()
-
 
