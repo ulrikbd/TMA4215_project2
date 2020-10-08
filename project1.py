@@ -73,8 +73,13 @@ class NeuralNetwork():
 
     def get_P_km1(self, Y_k, P_k, k):
         # Y is the vector of function values from the last layer.
+<<<<<<< HEAD
         #P[self.K] = np.outer(w, (Y-c)* hypothesis_function_derivated(Z[K]))
         return P_k + np.outer(self.h*np.transpose(self.W[k-1]) , (self.activation_function_derivated(self.W[k-1] @ self.Z[k-1] + self.b[k-1]) * P_k))
+=======
+        #P[self.K] = w*(Y-c)* hypothesis_function_derivated(Z[K])
+        return P_k + self.h*np.transpose(self.W[k-1]) @ (self.activation_function_derivated(self.W[k-1] @ self.Z[k-1] + self.b[k-1]) * P_k)
+>>>>>>> 01b3ce413ea8bbc8497900d196eefcce032abcad
 
     def dJ_dWk(self, k, P_kp1):
         return self.h*(P_kp1 * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
