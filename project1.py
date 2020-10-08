@@ -54,10 +54,17 @@ class NeuralNetwork():
         return 1/(2 + 2*np.cosh(x))
 
     def transformation(self, y, k):
+<<<<<<< HEAD
          return y + self.h*self.activation_function(self.W[k]@y + self.b[k])
 
     def get_Z_kp1(self, Z_k, k):
         return self.transformation(Z_k, k)
+=======
+         return y + self.h*self.activation_function(self.W[k] @ y + self.b[k])
+
+    def get_Z_kp1(self, k):
+        return self.transformation(self.Z[k], k)
+>>>>>>> ad893a2dc86aca3c5a5390ef894b53ea176bb7f7
 
     def scale_y0(self):
         a = np.min(self.y0)
@@ -82,26 +89,26 @@ class NeuralNetwork():
         print("Z:", self.Z)
         print("yps:", self.yps)
 
-    def get_P_km1(self, Y_k, P_k, Z_km1, k):
+    def get_P_km1(self, Y_k, P_k, k):
         # Y is the vector of function values from the last layer.
         #P[self.K] = w*(Y-c)* hypothesis_function_derivated(Z[K])
-        return P_k + h*np.transpose(self.W[k-1]) @ (activation_function_derivated(self.W[k-1] @ Z_km1 + self.b[k-1]) * P_k)
+        return P_k + self.h*np.transpose(self.W[k-1]) @ (self.activation_function_derivated(self.W[k-1] @ self.Z[k-1] + self.b[k-1]) * P_k)
 
-    def dJ_dWk(self, k, P_kp1, Z_k):
-        return h*(P_kp1 * activation_function_derivated(self.W[k] @ Z_k + self.b[k]) @ np.transpose(Z_k))
+    def dJ_dWk(self, k, P_kp1):
+        return self.h*(P_kp1 * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
 
     def dJ_dbk(self):
-        s = np.shape(activation_function_derivated(self.W[k] @ Z_k + self.b[k]))
-        return h*(P_kp1 * activation_function_derivated(self.W[k] @ Z_k + self.b[k]) @ np.ones(s))
+        s = np.shape(self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]))
+        return self.h*(P_kp1 * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.ones(s))
 
-    def dJ_dw(self, Z_Km1, Y):
-        Z_K = get_Z_kp1(Z_Km1, self.K-1)
-        s = np.shape(np.transpose(Z_K) @ w)
+    def dJ_dw(self, Y):
+        Z_K = self.Z[-1]
+        s = np.shape(np.transpose(Z_K) @ self.w)
         return Z_K @ (((Y-self.c)) * self.hypothesis_function_derivated(np.transpoose(Z_K) @ self.w + self.mu @ np.ones(np.shape(s))))
 
-    def dJ_dmu(self, Z_Km1, Y):
-        Z_K = get_Z_kp1(Z_Km1, self.K-1)
-        s = np.shape(np.transpose(Z_K) @ w)
+    def dJ_dmu(self, Y):
+        Z_K = self.Z[-1]
+        s = np.shape(np.transpose(Z_K) @ self.w)
         return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu @ np.ones(np.shape(s)))) @ (Y-self.c)
 
     def adam_decent(self):
