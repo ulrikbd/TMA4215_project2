@@ -19,7 +19,8 @@ class NeuralNetwork():
         self.w = np.random.randn(self.d, 1)
         self.mu = np.random.randn(1)
         self.c = c
-        self.Z = []
+        self.Z = None
+        self.yps = None
 
 
     def embed_1D(self):
@@ -30,6 +31,11 @@ class NeuralNetwork():
     def initialize_Z(self):
         self.Z = np.zeros(shape=(self.K, self.d, len(self.y0[0])))
         self.Z[0] = self.y0
+        for k in range(1, self.K):
+            self.Z[k] = self.get_Z_kp1(self.Z[k - 1], k - 1)
+
+    def initialize_yps(self):
+        self.yps = self.hypothesis_function(np.transpose(self.Z[-1])@self.w + np.ones(len(self.y0))*self.mu)
 
 
     def activation_function(self, x):
@@ -38,6 +44,9 @@ class NeuralNetwork():
     def activation_function_derivated(self, x):
         return 1/(np.cosh(x)**2)
 
+    def objective_function(self):
+        return 1/2 * np.linalg.norm(self.yps - self.c)**2
+
     def hypothesis_function(self, x):
         return 1/2 * (1 + np.tanh(x/2))
 
@@ -45,10 +54,10 @@ class NeuralNetwork():
         return 1/(2 + 2*np.cosh(x))
 
     def transformation(self, y, k):
-         return y + self.h*activation_function(self.W[k]*y + self.b[k])
+         return y + self.h*self.activation_function(self.W[k]@y + self.b[k])
 
     def get_Z_kp1(self, Z_k, k):
-        return transformation(Z_k, k)
+        return self.transformation(Z_k, k)
 
     def scale_y0(self):
         a = np.min(self.y0)
@@ -70,6 +79,8 @@ class NeuralNetwork():
         print("d0", self.d0)
         print("y0:", self.y0)
         print("c:", self.c)
+        print("Z:", self.Z)
+        print("yps:", self.yps)
 
     def get_P_km1(self, Y_k, P_k, Z_km1, k):
         # Y is the vector of function values from the last layer.
@@ -81,7 +92,7 @@ class NeuralNetwork():
 
     def dJ_dbk(self):
         s = np.shape(activation_function_derivated(self.W[k] @ Z_k + self.b[k]))
-        return h*(P_kp1 * activation_function_derivated(self.W[k] @ Z_k + self.b[k]) @ np.ones(s)
+        return h*(P_kp1 * activation_function_derivated(self.W[k] @ Z_k + self.b[k]) @ np.ones(s))
 
     def dJ_dw(self, Z_Km1, Y):
         Z_K = get_Z_kp1(Z_Km1, self.K-1)
@@ -117,5 +128,7 @@ c = F(y0)
 network = NeuralNetwork(K, tau, h, y0, d, c)
 network.scale_input()
 network.embed_1D()
-network.printparameters()
+
 network.initialize_Z()
+network.initialize_yps()
+network.printparameters()
