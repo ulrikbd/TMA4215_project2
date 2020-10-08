@@ -22,6 +22,9 @@ class NeuralNetwork():
 
     def activation_function(self, x):
         return np.tanh(x)
+    
+    def activation_function_derivated(self, x):
+        return 1/(np.cosh(x)**2)
 
     def hypothesis_function(self, x):
         return 1/2 * (1 + np.tanh(x/2))
@@ -56,26 +59,27 @@ class NeuralNetwork():
         print("y0:", self.y0)
         print("c:", self.c)
     
-    def get_P_km1(self, Y_k, P_k):
+    def get_P_km1(self, Y_k, P_k, Z_km1, k):
         # Y is the vector of function values from the last layer. 
-
-        P[self.K] = w*(Y-c)* hypothesis_function_derivated(Z[K])
-        for k in range(K, 0, -1):
-            P[k] = P[k-1] + h*np.transpose(W[])
-        return 
+        #P[self.K] = w*(Y-c)* hypothesis_function_derivated(Z[K])
+        return P_k + h*np.transpose(self.W[k-1]) @ (activation_function_derivated(self.W[k-1] @ Z_km1 + self.b[k-1]) * P_k)
     
-    def dJ_dWk(self):
-        return h*()
+    def dJ_dWk(self, k, P_kp1, Z_k):
+        return h*(P_kp1 * activation_function_derivated(self.W[k] @ Z_k + self.b[k]) @ np.transpose(Z_k))
     
     def dJ_dbk(self):
-        return
+        s = np.shape(activation_function_derivated(self.W[k] @ Z_k + self.b[k]))
+        return h*(P_kp1 * activation_function_derivated(self.W[k] @ Z_k + self.b[k]) @ np.ones(s)
     
-    def dJ_dw(self):
-        return 
-    
-    def dJ_dmu(self, Z_Km1):
+    def dJ_dw(self, Z_Km1, Y):
         Z_K = get_Z_kp1(Z_Km1, self.K-1)
-        return hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ w + mu @ np.ones(np.shape(np.transpose(Z_K) @ w))))
+        s = np.shape(np.transpose(Z_K) @ w)
+        return Z_K @ (((Y-self.c)) * self.hypothesis_function_derivated(np.transpoose(Z_K) @ self.w + self.mu @ np.ones(np.shape(s))))
+    
+    def dJ_dmu(self, Z_Km1, Y):
+        Z_K = get_Z_kp1(Z_Km1, self.K-1)
+        s = np.shape(np.transpose(Z_K) @ w)
+        return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu @ np.ones(np.shape(s)))) @ (Y-self.c)
         
     def adam_decent(self):
         beta1 = 0.9
