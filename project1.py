@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def testgit(x):
+def gittest(x):
+    x = x**2
     return x**2
 
