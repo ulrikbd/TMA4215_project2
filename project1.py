@@ -99,18 +99,15 @@ class NeuralNetwork():
         return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
 
     def dJ_dbk(self, k):
-        s = np.shape(self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]))
-        return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.ones(s))
+        return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.ones(I,1))
 
     def dJ_dw(self, yps):
         Z_K = self.Z[-1]
-        s = np.shape(np.transpose(Z_K) @ self.w)
-        return Z_K @ (((yps-self.c)) * self.hypothesis_function_derivated(np.transpoose(Z_K) @ self.w + self.mu @ np.ones(np.shape(s))))
+        return Z_K @ (((yps-self.c)) * self.hypothesis_function_derivated(np.transpoose(Z_K) @ self.w + self.mu @ np.ones(I,1)))
 
     def dJ_dmu(self, yps):
         Z_K = self.Z[-1]
-        s = np.shape(np.transpose(Z_K) @ self.w)
-        return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu @ np.ones(np.shape(s)))) @ (yps-self.c)
+        return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu @ np.ones(I,1))) @ (yps-self.c)
 
 def adam_descent_step(U, dU, j, m, v):
     beta_1 = 0.9
@@ -125,7 +122,10 @@ def adam_descent_step(U, dU, j, m, v):
     U = U - alpha*m_hat/(np.sqrt(v_hat) + eps)
     return U, m, v
 
-def simple_scheme(U, dU, j, tau, tol):
+def simple_scheme(U_prev, dU, tau):
+    return U_prev - tau * dU
+
+
 
 I = 20
 y0 = np.random.uniform(-2, 2, I)
@@ -144,3 +144,22 @@ network.initialize_Z()
 network.initialize_yps()
 network.initialize_P()
 print(network.P)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
