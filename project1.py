@@ -125,6 +125,7 @@ def adam_descent_step(U, dU, j, m, v):
     U = U - alpha*m_hat/(np.sqrt(v_hat) + eps)
     return U, m, v
 
+def simple_scheme(U, dU, j, tau, tol):
 
 I = 20
 y0 = np.random.uniform(-2, 2, I)
