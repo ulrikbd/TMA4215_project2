@@ -108,10 +108,18 @@ class NeuralNetwork():
 
     def train(self, method):
         for k in range(K-1):
-            method(self.W[k], self.dJ_dWk(k), self.tau)
-            method(self.b[k], self.dJ_dbk(k), self.tau)
-            method(self.w, self.dJ_dw(self.yps), self.tau)
-            method(self.mu, self.dJ_dmu(self.yps), self.tau)
+            self.W[k] = method(self.W[k], self.dJ_dWk(k), self.tau)
+            self.b[k] = method(self.b[k], self.dJ_dbk(k), self.tau)
+            self.w = method(self.w, self.dJ_dw(self.yps), self.tau)
+            self.mu = method(self.mu, self.dJ_dmu(self.yps), self.tau)
+
+    #def test(self):
+    #    y = np.zeros(I)
+    #    y[0] = y0
+    #    y[1] = self.transformation(y0, 1)
+    #    for k in range(2, K):
+    #        y[k] = self.transformation(y, k)
+    #    return y
 
 
 def adam_descent_step(U, dU, j, m, v): # One step of the adam gradient decent for one parameter
@@ -149,6 +157,7 @@ network.initialize_yps()
 network.initialize_P()
 print(network.P)
 network.train(simple_scheme)
+
 
 
 
