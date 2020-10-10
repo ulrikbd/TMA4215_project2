@@ -8,37 +8,37 @@ class NeuralNetwork():
 
     def __init__(self, K, tau, h, y0, d, c):
         """Initialize varibles"""
-        self.K = K # number of layers
-        self.tau = tau # learning parameter
-        self.h = h # step length
-        self.y0 = y0 # input data
-        self.I = len(y0) # number of data points
-        self.d = d # dimension of the hidden layers
-        self.d0 = np.ndim(y0) # dimension of input data
-        self.W = np.random.randn(self.K, self.d, self.d) # weights
-        self.b = np.random.randn(self.K, self.d, 1) # bias
-        self.w = np.random.randn(self.d, 1) # parameter for the last hidden layer
-        self.mu = np.random.randn(1) # parameter for the last hidden layer
-        self.c = c # vector of given data points
-        self.Z = None # intermediate values
-        self.yps = None # vector of function values
-        self.P = None # vector of back propagation
+        self.K = K  # number of layers
+        self.tau = tau  # learning parameter
+        self.h = h  # step length
+        self.y0 = y0  # input data
+        self.I = len(y0)  # number of data points
+        self.d = d  # dimension of the hidden layers
+        self.d0 = np.ndim(y0)  # dimension of input data
+        self.W = np.random.randn(self.K, self.d, self.d)  # weights
+        self.b = np.random.randn(self.K, self.d, 1)  # bias
+        self.w = np.random.randn(self.d, 1)  # parameter for the last hidden layer
+        self.mu = np.random.randn(1)  # parameter for the last hidden layer
+        self.c = c  # vector of given data points
+        self.Z = None  # intermediate values
+        self.yps = None  # vector of function values
+        self.P = None  # vector of back propagation
 
-    def embed_1D(self): # embed input data to dimension d
+    def embed_1D(self):  # embed input data to dimension d
         y = np.zeros(shape=(self.d, self.I))
         y[0] = self.y0
         self.y0 = y
 
-    def initialize_Z(self): # making Z
+    def initialize_Z(self):  # making Z
         self.Z = np.zeros(shape=(self.K, self.d, self.I))
         self.Z[0] = self.y0
         for k in range(1, self.K):
             self.Z[k] = self.get_Z_kp1(k - 1)
 
-    def initialize_yps(self): # making Y
+    def initialize_yps(self):  # making Y
         self.yps = self.hypothesis_function(np.transpose(self.Z[-1]) @ self.w + np.ones((self.I, 1))*self.mu)
 
-    def initialize_P(self): # making P
+    def initialize_P(self):  # making P
         self.P = np.zeros(shape=(self.K, self.d, self.I))
         self.P[-1] = self.w @ np.transpose(np.multiply((self.yps - self.c), self.hypothesis_function_derivated(np.transpose(self.Z[-1]) @ self.w + self.mu*np.ones((self.I, 1)))))
         for k in range(K - 2, -1, -1):
@@ -62,7 +62,7 @@ class NeuralNetwork():
     def transformation(self, y, k):
         return y + self.h*self.activation_function(self.W[k] @ y + self.b[k])
 
-    def get_Z_kp1(self, k): # get Z_(k+1)
+    def get_Z_kp1(self, k):  # get Z_(k+1)
         return self.transformation(self.Z[k], k)
 
     def scale_y0(self):
@@ -89,40 +89,47 @@ class NeuralNetwork():
         print("Z:", self.Z)
         print("yps:", self.yps)
 
-    def get_P_km1(self, k): # get P_(k-1)
+    def get_P_km1(self, k):  # get P_(k-1)
         return self.P[k + 1] + self.h*np.transpose(self.W[k]) @ (self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) * self.P[k+1])
 
     def dJ_dWk(self, k): # get dJ/dW_k which is element of theta
         return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
 
-    def dJ_dbk(self, k): # get dJ/db_k which is element of theta
+    def dJ_dbk(self, k):  # get dJ/db_k which is element of theta
         return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k])) @ np.ones((I, 1))
 
-    def dJ_dw(self, yps): # get dJ/dw which is element of theta
+    def dJ_dw(self, yps):  # get dJ/dw which is element of theta
         Z_K = self.Z[-1]
         return Z_K @ ((yps-self.c) * self.hypothesis_function_derivated(np.transpose(Z_K) @ self.w + self.mu * np.ones((I, 1))))
 
-    def dJ_dmu(self, yps): # get dJ/dmu which is element of theta
+    def dJ_dmu(self, yps):  # get dJ/dmu which is element of theta
         Z_K = self.Z[-1]
         return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu * np.ones((I, 1))) @ (yps-self.c))
 
     def train(self, method):
         for k in range(K-1):
+            self.initialize_Z()
+            self.initialize_yps()
+            self.initialize_P()
             self.W[k] = method(self.W[k], self.dJ_dWk(k), self.tau)
             self.b[k] = method(self.b[k], self.dJ_dbk(k), self.tau)
             self.w = method(self.w, self.dJ_dw(self.yps), self.tau)
             self.mu = method(self.mu, self.dJ_dmu(self.yps), self.tau)
 
-    #def test(self):
-    #    y = np.zeros(I)
-    #    y[0] = y0
-    #    y[1] = self.transformation(y0, 1)
-    #    for k in range(2, K):
-    #        y[k] = self.transformation(y, k)
-    #    return y
+    def test(self):
+        self.initialize_Z()
+        self.initialize_yps()
+
+    def compare(self, tol):
+        correct = 0
+        for i in range(len(self.yps)):
+            if self.yps[i] - self.c[i] < tol :
+                correct = correct + 1
+        percentage = (correct / len(self.yps))*100
+        return  correct, percentage
 
 
-def adam_descent_step(U, dU, j, m, v): # One step of the adam gradient decent for one parameter
+def adam_descent_step(U, dU, j, m, v):  # One step of the adam gradient decent for one parameter
     beta_1 = 0.9
     beta_2 = 0.999
     alpha = 0.01
@@ -136,13 +143,15 @@ def adam_descent_step(U, dU, j, m, v): # One step of the adam gradient decent fo
     return U, m, v
 
 
-def simple_scheme(U, dU, tau): # One step of simple scheme to optimize weights and bias, for one parameter
-    return U- tau * dU
+def simple_scheme(U, dU, tau):  # One step of simple scheme to optimize weights and bias, for one parameter
+    return U - tau * dU
 
 
+tol = 10**(-3)
+iterations = 100
 I = 20
 y0 = np.random.uniform(-2, 2, I)
-K = 3
+K = 15
 h = 0.5
 d = 2
 tau = 0.5
@@ -155,8 +164,27 @@ network.embed_1D()
 network.initialize_Z()
 network.initialize_yps()
 network.initialize_P()
-print(network.P)
-network.train(simple_scheme)
+correct1, percentage1 = network.compare(tol)
+print(percentage1)
+
+percentage_vec = np.zeros(iterations)
+for i in range(iterations):
+    network.train(simple_scheme)
+    correct, percentage = network.compare(tol)
+    percentage_vec[i] = percentage
+plt.plot(np.linspace(0, iterations-1, iterations), percentage_vec)
+plt.show()
+
+network.test()
+correct2, percentage2 = network.compare(tol)
+print(percentage2)
+
+# Har prøvd meg litt men trenger 10 lag og 100 iterasjoner for å få bitte-litt resultat så det er nok ikke super bra det jeg har skrevet.
+# Kan hende man trenger så mange lag og iterasjoner på grunn av at jeg bruker den enkle metoden (simple scheme)?
+# Planen min var egentlig at train(metode) skulle kunne ta inn metoden man ville og så skulle den funke for både Adam og simple scheme,
+# men tror kun den funker på simple scheme til nå.
+# Også er jeg usikker på strukturen, hva som er best å ha inni klassen og utfor, så valgene mine der er ikke veldig gjennomtenkt.
+#
 
 
 
