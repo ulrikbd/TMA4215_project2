@@ -183,6 +183,35 @@ class NeuralNetwork():
             
             self.cost[i] = self.objective_function()        
         
+    def train_adams_descent(self, iterations):
+        """Training the model using the adams descent algorithm
+        for optimization"""
+        self.cost = np.zeros(iterations)
+        
+        m_mu = 0
+        v_mu = 0
+        m_w = np.zeros(np.shape(self.w))
+        v_w = np.zeros(np.shape(self.w))
+        m_W = np.zeros(np.shape(self.W))
+        v_W = np.zeros(np.shape(self.W))
+        m_b = np.zeros(np.shape(self.b))
+        v_b = np.zeros(np.shape(self.b))
+        
+        for i in range(1, iterations + 1):
+            self.initialize_Z()
+            self.initialize_yps()
+            self.initialize_P()
+            # Get theta values
+            dJ_dW, dJ_db, dJ_dw, dJ_dmu = self.get_theta()
+            
+            self.W, m_W, v_W = adam_descent_step(self.W, dJ_dW, i, m_W, v_W)
+            self.b, m_b, v_b = adam_descent_step(self.b, dJ_db, i, m_b, v_b)
+            self.w, m_w, v_w = adam_descent_step(self.w, dJ_dw, i, m_w, v_w)
+            self.mu, m_mu, v_mu = adam_descent_step(self.mu, dJ_dmu, i, m_mu, v_mu)
+            
+            self.cost[i - 1] = self.objective_function()
+
+        
     def evaluate_data(self, data):
         """Evaluate new data with our weights found during the 
         training phase"""
@@ -216,9 +245,9 @@ def simple_scheme(U, dU, tau):
 
 np.random.seed(666)
 iterations = 500
-I = 100
+I = 500
 y0 = np.random.uniform(-2, 2, I)
-K = 10
+K = 20
 h = 0.1
 d = 2
 tau = 0.1
@@ -227,7 +256,7 @@ c = F(y0)
 c = c.reshape((I, 1))
 network = NeuralNetwork(K, tau, h, y0, d, c, I)
 
-network.train_vanilla(iterations)
+network.train_adams_descent(iterations)
 network.plot_cost()
 
 
