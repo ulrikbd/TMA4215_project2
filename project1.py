@@ -106,7 +106,7 @@ class NeuralNetwork():
         Z_K = self.Z[-1]
         return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu * np.ones((I, 1))) @ (yps-self.c))
 
-    def train(self, method):
+    def train(self, method):  # update weights one time whith specified method
         for k in range(K-1):
             self.initialize_Z()
             self.initialize_yps()
@@ -126,7 +126,7 @@ class NeuralNetwork():
             if self.yps[i] - self.c[i] < tol :
                 correct = correct + 1
         percentage = (correct / len(self.yps))*100
-        return  correct, percentage
+        return correct, percentage
 
 
 def adam_descent_step(U, dU, j, m, v):  # One step of the adam gradient decent for one parameter
@@ -147,14 +147,14 @@ def simple_scheme(U, dU, tau):  # One step of simple scheme to optimize weights 
     return U - tau * dU
 
 
-tol = 10**(-3)
-iterations = 100
+tol = 10**(-2)
+iterations = 500
 I = 20
 y0 = np.random.uniform(-2, 2, I)
-K = 15
-h = 0.5
+K = 3
+h = 0.01
 d = 2
-tau = 0.5
+tau = 0.05
 F = lambda y: 1/2*y**2
 c = F(y0)
 c = c.reshape((I, 1))
