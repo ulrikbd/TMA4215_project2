@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+plt.style.use('seaborn')
 
 np.random.seed(666)
 
@@ -47,6 +48,7 @@ def test_with_known_functions():
     network.train_vanilla(iterations)
     # Plot the cost function
     network.plot_cost()
+    plt.grid(True)
     plt.savefig("./plots/cost_func_F(y)_vanilla.pdf", bbox_inches="tight")
 
     data = np.random.uniform(-2, 2, I)
@@ -56,8 +58,7 @@ def test_with_known_functions():
     plt.plot(x, F(x), label="Exact solution")
     plt.scatter(data, network.yps, marker='.', c="r", s=7, label="Model solution")
     plt.xlabel(r'$y$')
-    plt.grid()
-    plt.legend()
+    plt.grid(True)
     plt.savefig("./plots/test_solution_F(y)_vanilla.pdf", bbox_inches="tight")
 
 
@@ -71,6 +72,7 @@ def test_with_known_functions():
     network.train_adams_descent(iterations)
     # Plot the cost function
     network.plot_cost()
+    plt.grid(True)
     plt.savefig("./plots/cost_func_G(y)_adams.pdf", bbox_inches="tight")
 
     data = np.random.uniform(-np.pi/3, np.pi/3, I)
@@ -80,7 +82,7 @@ def test_with_known_functions():
     plt.plot(x, G(x), label="Exact solution")
     plt.scatter(data, network.yps, marker='.', c="r", s=7, label="Model solution")
     plt.xlabel(r'$y$')
-    plt.grid()
+    plt.grid(True)
     plt.legend()
     plt.savefig("./plots/test_solution_G(y)_vanilla.pdf", bbox_inches="tight")
 
@@ -96,56 +98,23 @@ def test_with_known_functions():
     nn.train_vanilla(iterations)
     # Plot the cost function
     nn.plot_cost()
+    plt.grid(True)
     plt.savefig("./plots/cost_func_H(y)_vanilla.pdf", bbox_inches="tight")
 
     data1 = np.random.uniform(-2, 2, I)
     data2 = np.random.uniform(-2, 2, I)
     data = np.array([data1, data2])
     nn.evaluate_data(data)
+
     fig = plt.figure()
     ax = plt.axes(projection='3d')
-    ax.scatter3D(data1, data2, nn.yps)
-    fig = plt.figure()
-    ax = plt.axes(projection='3d')
-    ax.scatter3D(data1, data2, H([data1, data2]))
+    ax.plot_trisurf(data1, data2, H([data1, data2]), alpha=0.4)
+    ax.scatter3D(data1, data2, nn.yps, c='r', label='Model solution')
+    ax.set_xlabel(r'$y_1$')
+    ax.set_ylabel(r'$y_2$')
+    ax.legend()
+    plt.savefig("./plots/test_solution_H(y)_vanilla.pdf", bbox_inches="tight")
 
-
-
-
-# 2D testing
-I = 300
-iterations = 500
-y1 = np.random.uniform(-2, 2, I)
-y2 = np.random.uniform(-2, 2, I)
-y0 = np.array([y1, y2])
-d = 4
-K = 10
-h = 0.1
-tau = 0.1
-
-
-def G(y):
-    return 1 / 2 * (y[0]**2 + y[1]**2)
-
-
-c = G(y0)
-
-c = c.reshape((I, 1))
-nn = NeuralNetwork(K, tau, h, y0, d, c, I)
-nn.train_vanilla(iterations)
-nn.plot_cost()
-
-
-data1 = np.random.uniform(-2, 2, I)
-data2 = np.random.uniform(-2, 2, I)
-data = np.array([data1, data2])
-nn.evaluate_data(data)
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.scatter3D(data1, data2, nn.yps)
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.scatter3D(data1, data2, G([data1, data2]))
 
 def main():
     test_with_known_functions()
