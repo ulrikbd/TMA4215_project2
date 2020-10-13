@@ -163,7 +163,7 @@ class NeuralNetwork():
         """Plots the cost function at each iteration"""
         plt.figure()
         plt.plot(np.arange(len(self.cost)), self.cost)
-        plt.grid()
+        plt.grid(True)
         plt.xlabel("Iterations")
         plt.ylabel(r'$J(\theta)$')
 
