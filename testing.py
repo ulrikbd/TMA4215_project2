@@ -34,9 +34,9 @@ def test_with_known_functions():
         return 1/2*(y[0]**2 + y[1]**2)
 
     iterations = 500
-    I = 300
+    I = 500
     y0 = np.random.uniform(-2, 2, I)
-    K = 20
+    K = 15
     h = 0.1
     d = 2
     tau = 0.1
@@ -46,6 +46,7 @@ def test_with_known_functions():
 
     # Train the model using the vanilla gradient descent
     network.train_vanilla(iterations)
+    print(network.cost[-1] / I)
     # Plot the cost function
     network.plot_cost()
     plt.grid(True)
@@ -63,7 +64,7 @@ def test_with_known_functions():
 
 
     y0 = np.random.uniform(-np.pi/3, np.pi/3, I)
-    K = 20
+    K = 15
     c = G(y0)
     c = c.reshape((I, 1))
     network = NeuralNetwork(K, tau, h, y0, d, c, I)

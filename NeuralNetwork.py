@@ -25,6 +25,8 @@ class NeuralNetwork():
         self.w = np.random.randn(self.d, 1)
         self.mu = np.random.randn(1)  # parameter for the last hidden layer
         self.c = c  # vector of given data points
+        self.alpha = 0  # parameter used for minmax scaling
+        self.beta = 1  # parameter used for minmax scaling
 
         self.scale_input()
         self.embed()
@@ -67,7 +69,7 @@ class NeuralNetwork():
 
     def activation_function_derivated(self, x):
         """Derivative of the activation function"""
-        return 1 / (np.cosh(x)**2)
+        return 1 - np.tanh(x)**2
 
     def objective_function(self):
         return 1 / 2 * np.linalg.norm(self.yps - self.c)**2
@@ -78,7 +80,7 @@ class NeuralNetwork():
 
     def hypothesis_function_derivated(self, x):
         """Derivative of the hypothesis function"""
-        return 1 / (2 + 2 * np.cosh(x))
+        return 1/4*(1-np.tanh(x/2)**2)
 
     def transformation(self, y, k):
         """Function which maps from one layer to the next in the
@@ -100,11 +102,13 @@ class NeuralNetwork():
 
     def scale_y0(self):
         """Scales the input values with maxmin scaling"""
-        self.y0 = (self.y0 - self.y0_a) / (self.y0_b - self.y0_a)
+        self.y0 = 1 / (self.y0_b - self.y0_a) * (
+            (self.y0_b - self.y0) * self.alpha + (self.y0 - self.y0_a) * self.beta)
 
     def scale_c(self):
         """Scales the given datapoints with maxmin scaling"""
-        self.c = (self.c - self.c_a) / (self.c_b - self.c_a)
+        self.c = 1 / (self.c_b - self.c_a) * (
+            (self.c_b - self.c) * self.alpha + (self.c - self.c_a) * self.beta)
 
     def scale_input(self):
         """Scales both the input values and the given data"""
@@ -115,7 +119,8 @@ class NeuralNetwork():
     def scale_up_solution(self):
         """Scales up the solution based on the factors previously found
         for the given datapoints"""
-        self.yps = self.yps * (self.c_b - self.c_a) + self.c_a
+        self.yps = 1 / (self.beta - self.alpha) * (
+            (self.yps - self.alpha) * self.c_b + (self.beta - self.yps) * self.c_a)
 
     def printparameters(self):
         """Helperfunction for debugging"""
