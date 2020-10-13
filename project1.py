@@ -223,14 +223,7 @@ class NeuralNetwork():
         self.embed()
         self.initialize_Z()
         self.initialize_yps()
-        
-    def compare(self, tol):
-        correct = 0
-        for i in range(len(self.yps)):
-            if self.yps[i] - self.c[i] < tol :
-                correct = correct + 1
-        percentage = (correct / len(self.yps))*100
-        return correct, percentage
+        self.scale_up_solution()
 
 
 # One step of the adam gradient decent for one parameter
@@ -258,7 +251,7 @@ np.random.seed(666)
 iterations = 500
 I = 500
 y0 = np.random.uniform(-2, 2, I)
-K = 20
+K = 10
 h = 0.1
 d = 2
 tau = 0.1
@@ -268,34 +261,9 @@ F = lambda y: 1/2*y**2
 c = F(y0)
 c = c.reshape((I, 1))
 network = NeuralNetwork(K, tau, h, y0, d, c, I)
-network.scale_input()
-network.embed_1D()
-network.train_vanilla(iterations)
-network.plot_cost()
-
-data = np.random.uniform(-2, 2, I)
-network.evaluate_data(data)
-plt.figure()
-plt.scatter(data, F(data), marker='.')
-plt.scatter(data, network.yps)
-plt.show()
-
-plt.figure()
-x = np.linspace(-2, 2)
-plt.plot(x, (F(x) + 2) / 4)
-plt.show()
-
-
-def F(y): return 1 / 2 * y**2
-
-
-c = F(y0)
-c = c.reshape((I, 1))
-network = NeuralNetwork(K, tau, h, y0, d, c, I)
 
 network.train_adams_descent(iterations)
 network.plot_cost()
-
 
 data = np.random.uniform(-2, 2, I)
 network.evaluate_data(data)

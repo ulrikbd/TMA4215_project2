@@ -31,15 +31,13 @@ class NeuralNetwork():
 
     def embed(self):
         """Embed starting values into a higher dimension"""
+        y = np.zeros(shape=(self.d, self.I))
         if self.d0 == 1:
-            y = np.zeros(shape=(self.d, self.I))
             y[0] = self.y0
-            self.y0 = y
-        elif self.d0 == 2:
-            y = np.zeros(shape=(self.d, self.I))
-            y[0] = self.y0[0]
-            y[1] = self.y0[1]
-            self.y0 = y
+        else:
+            for i in range(self.d0):
+                y[i] = self.y0[i]
+        self.y0 = y
 
     def initialize_Z(self):
         """Initialize the KxdxI matrix where all the data in the
@@ -172,6 +170,7 @@ class NeuralNetwork():
     def train_vanilla(self, iterations):
         """Training the model using the vanilla gradient method"""
         self.cost = np.zeros(iterations)  # Initialize storage for the cost
+
         for i in range(iterations):
             self.initialize_Z()
             self.initialize_yps()
