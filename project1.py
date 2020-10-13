@@ -20,9 +20,9 @@ class NeuralNetwork():
         self.w = np.random.randn(self.d, 1)  # parameter for the last hidden layer
         self.mu = np.random.randn(1)  # parameter for the last hidden layer
         self.c = c  # vector of given data points
-        self.Z = None  # intermediate values
-        self.yps = None  # vector of function values
-        self.P = None  # vector of back propagation
+        
+    
+
 
     def embed_1D(self):  # embed input data to dimension d
         y = np.zeros(shape=(self.d, self.I))
@@ -92,34 +92,62 @@ class NeuralNetwork():
     def get_P_km1(self, k):  # get P_(k-1)
         return self.P[k + 1] + self.h*np.transpose(self.W[k]) @ (self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) * self.P[k+1])
 
-    def dJ_dWk(self, k): # get dJ/dW_k which is element of theta
-        return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
+    def dJ_dW(self): # get dJ/dW which is element of theta
+        dJ_dW = np.zeros(np.shape(self.W))
+        for k in range(self.K - 1):
+            dJ_dW[k] = self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
+        return dJ_dW
 
-    def dJ_dbk(self, k):  # get dJ/db_k which is element of theta
-        return self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k])) @ np.ones((I, 1))
+    def dJ_db(self):  # get dJ/db which is element of theta
+        dJ_db = np.zeros(np.shape(self.b))
+        for k in range(self.K - 1):
+            dJ_db[k] = self.h*(self.P[k+1] * self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k])) @ np.ones((I, 1))
+        
+        return dJ_db
 
-    def dJ_dw(self, yps):  # get dJ/dw which is element of theta
+    def dJ_dw(self):  # get dJ/dw which is element of theta
         Z_K = self.Z[-1]
-        return Z_K @ ((yps-self.c) * self.hypothesis_function_derivated(np.transpose(Z_K) @ self.w + self.mu * np.ones((I, 1))))
+        return Z_K @ ((self.yps-self.c) * self.hypothesis_function_derivated(np.transpose(Z_K) @ self.w + self.mu * np.ones((I, 1))))
 
-    def dJ_dmu(self, yps):  # get dJ/dmu which is element of theta
+    def dJ_dmu(self):  # get dJ/dmu which is element of theta
         Z_K = self.Z[-1]
-        return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu * np.ones((I, 1))) @ (yps-self.c))
+        return self.hypothesis_function_derivated(np.transpose(np.transpose(Z_K) @ self.w + self.mu * np.ones((I, 1))) @ (self.yps-self.c))
 
-    def train(self, method):  # update weights one time whith specified method
-        for k in range(K-1):
+    def get_theta(self):
+        return self.dJ_dW(), self.dJ_db(), self.dJ_dw(), self.dJ_dmu()
+    
+    def plot_cost(self):
+        plt.figure()
+        plt.plot(np.arange(len(self.cost)), self.cost)
+        plt.grid()
+        plt.xlabel("Iterations")
+        plt.ylabel(r'$J(\theta)$')
+    
+            
+    def train_vanilla(self, iterations):
+        self.cost = np.zeros(iterations)
+        for i in range(iterations):
             self.initialize_Z()
             self.initialize_yps()
             self.initialize_P()
-            self.W[k] = method(self.W[k], self.dJ_dWk(k), self.tau)
-            self.b[k] = method(self.b[k], self.dJ_dbk(k), self.tau)
-            self.w = method(self.w, self.dJ_dw(self.yps), self.tau)
-            self.mu = method(self.mu, self.dJ_dmu(self.yps), self.tau)
-
-    def test(self):
+            
+            dJ_dW, dJ_db, dJ_dw, dJ_dmu = self.get_theta()
+            self.W = simple_scheme(self.W, dJ_dW, self.tau)
+            self.b = simple_scheme(self.b, dJ_db, self.tau)
+            self.w = simple_scheme(self.w, dJ_dw, self.tau)
+            self.mu = simple_scheme(self.mu, dJ_dmu, self.tau)
+            
+            self.cost[i] = self.objective_function()
+       
+        
+    def evaluate_data(self, data):
+        self.y0 = data
         self.initialize_Z()
         self.initialize_yps()
-
+        
+        
+        
+        
     def compare(self, tol):
         correct = 0
         for i in range(len(self.yps)):
@@ -147,44 +175,39 @@ def simple_scheme(U, dU, tau):  # One step of simple scheme to optimize weights 
     return U - tau * dU
 
 
-tol = 10**(-2)
+
+
+
+np.random.seed(666)
+tol = 10**(-3)
 iterations = 500
-I = 20
+I = 200
 y0 = np.random.uniform(-2, 2, I)
-K = 3
-h = 0.01
+K = 10
+h = 0.1
 d = 2
-tau = 0.05
+tau = 0.1
+
 F = lambda y: 1/2*y**2
 c = F(y0)
 c = c.reshape((I, 1))
 network = NeuralNetwork(K, tau, h, y0, d, c)
 network.scale_input()
 network.embed_1D()
-network.initialize_Z()
-network.initialize_yps()
-network.initialize_P()
-correct1, percentage1 = network.compare(tol)
-print(percentage1)
+network.train_vanilla(iterations)
+network.plot_cost()
 
-percentage_vec = np.zeros(iterations)
-for i in range(iterations):
-    network.train(simple_scheme)
-    correct, percentage = network.compare(tol)
-    percentage_vec[i] = percentage
-plt.plot(np.linspace(0, iterations-1, iterations), percentage_vec)
+data = np.random.uniform(-2, 2, I)
+network.evaluate_data(data)
+plt.figure()
+plt.scatter(data, F(data), marker='.')
+plt.scatter(data, network.yps)
 plt.show()
 
-network.test()
-correct2, percentage2 = network.compare(tol)
-print(percentage2)
-
-# Har prøvd meg litt men trenger 10 lag og 100 iterasjoner for å få bitte-litt resultat så det er nok ikke super bra det jeg har skrevet.
-# Kan hende man trenger så mange lag og iterasjoner på grunn av at jeg bruker den enkle metoden (simple scheme)?
-# Planen min var egentlig at train(metode) skulle kunne ta inn metoden man ville og så skulle den funke for både Adam og simple scheme,
-# men tror kun den funker på simple scheme til nå.
-# Også er jeg usikker på strukturen, hva som er best å ha inni klassen og utfor, så valgene mine der er ikke veldig gjennomtenkt.
-#
+plt.figure()
+x = np.linspace(-2, 2)
+plt.plot(x, (F(x) + 2) / 4)
+plt.show()
 
 
 
