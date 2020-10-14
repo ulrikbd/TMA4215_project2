@@ -10,6 +10,14 @@ plt.style.use('seaborn')
 #  other choices you need to make. Balance performance in the generalisation
 #  phase with time consumption of training.
 
+def plot(x, y, x_name, y_name):
+    plt.plot(x, y)
+    plt.xlabel(x_name)
+    plt.ylabel(y_name, rotation=0)  # turn around J(theta)
+    plt.grid(True)
+    plt.show()
+
+
 def test_K(K_vector, tau, h, y0, d, c, I):
     cost_vec =  np.zeros(len(K_vector))
     time_vector = np.zeros(len(K_vector))
@@ -24,18 +32,8 @@ def test_K(K_vector, tau, h, y0, d, c, I):
         stop = timeit.default_timer()
         time_vector[i] = stop - start
         i = i + 1
-    plt.plot(K_vector, cost_vec)
-    plt.xlabel('number of layers, K')
-    plt.ylabel(r'$J(\theta)$', rotation=0) # turn around J(theta)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-    plt.plot(K_vector, time_vector)
-    plt.xlabel('number of layers, K')
-    plt.ylabel('runtime [sek]')
-    plt.grid(True)
-    plt.show()
+    plot(K_vector, cost_vec, 'number of layers, K', r'$J(\theta)$')
+    plot(K_vector, time_vector, 'number of layers, K', 'runtime\n[sek]')
 
 
 def test_tau(K, tau_vector, h, y0, d, c, I):
@@ -52,18 +50,8 @@ def test_tau(K, tau_vector, h, y0, d, c, I):
         stop = timeit.default_timer()
         time_vector[i] = stop - start
         i = i + 1
-    plt.plot(tau_vector, cost_vec)
-    plt.xlabel(r'$\tau$')
-    plt.ylabel(r'$J(\theta)$', rotation=0) # turn around J(theta)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-    plt.plot(tau_vector, time_vector)
-    plt.xlabel('learning parameter,' + r'$\tau$')
-    plt.ylabel('runtime [sek]')
-    plt.grid(True)
-    plt.show()
+    plot(tau_vector, cost_vec, r'$\tau$', r'$J(\theta)$')
+    plot(tau_vector, time_vector, 'learning parameter,' + r'$\tau$','runtime\n[sek]')
 
 
 def test_h(K, tau, h_vector, y0, d, c, I):
@@ -80,18 +68,8 @@ def test_h(K, tau, h_vector, y0, d, c, I):
         stop = timeit.default_timer()
         time_vector[i] =  stop - start
         i = i + 1
-    plt.plot(h_vector, cost_vec)
-    plt.xlabel('h')
-    plt.ylabel(r'$J(\theta)$', rotation=0) # turn around J(theta)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-    plt.plot(h_vector, time_vector)
-    plt.xlabel('step length, h')
-    plt.ylabel('runtime [sek]')
-    plt.grid(True)
-    plt.show()
+    plot(h_vector, cost_vec, 'h', r'$J(\theta)$')
+    plot(h_vector, time_vector, 'step length, h', 'runtime\n[sek]' )
 
 
 def test_d(K, tau, h, y0, d_vector, c, I):
@@ -108,17 +86,8 @@ def test_d(K, tau, h, y0, d_vector, c, I):
         stop = timeit.default_timer()
         time_vector[i] =  stop - start
         i = i + 1
-    plt.plot(d_vector, cost_vec)
-    plt.xlabel('dimensions, d')
-    plt.ylabel(r'$J(\theta)$', rotation=0) # turn around J(theta)
-    plt.grid(True)
-    plt.show()
-
-    plt.plot(d_vector, time_vector)
-    plt.xlabel('dimensions, d')
-    plt.ylabel('runtime [sek]')
-    plt.grid(True)
-    plt.show()
+    plot(d_vector, cost_vec, 'dimensions, d', r'$J(\theta)$')
+    plot(d_vector, time_vector, 'dimensions,d', 'runtime\n[sek]')
 
 
 np.random.seed(666)
@@ -128,9 +97,9 @@ y0 = np.random.uniform(-2, 2, I)
 K_vec = np.linspace(3, 25, 26, dtype = int)
 K = 10
 h_vec = np.linspace(0.001, 0.9, 20)
-h = 0.4
+h = 0.3
 d_vec = np.linspace(1, 6, 6, dtype = int)
-d = 2
+d = 3
 tau_vec = np.linspace(0.001, 0.9, 20)
 tau = 0.1
 F = lambda y: 1/2*y**2
@@ -142,3 +111,5 @@ test_K(K_vec, tau, h, y0, d, c, I)
 test_tau(K, tau_vec, h, y0, d, c, I)
 test_h(K, tau, h_vec, y0, d, c, I)
 test_d(K, tau, h, y0, d_vec, c, I)
+
+# Ser ut til at dimmensjoner og antall lag er de som påvirker run timen mest.
