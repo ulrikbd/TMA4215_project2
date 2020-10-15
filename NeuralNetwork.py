@@ -149,7 +149,6 @@ class NeuralNetwork():
         for k in range(self.K - 1):
             dJ_db[k] = self.h * (self.P[k + 1] * self.activation_function_derivated(
                 self.W[k] @ self.Z[k] + self.b[k])) @ np.ones((self.I, 1))
-
         return dJ_db
 
     def dJ_dw(self):  # get dJ/dw which is element of theta
@@ -217,6 +216,10 @@ class NeuralNetwork():
                 self.mu, dJ_dmu, i, m_mu, v_mu)
 
             self.cost[i - 1] = self.objective_function()
+
+    def get_average_residual(self, value):
+        residual = np.absolute(self.yps - value)
+        return np.mean(residual)
 
     def evaluate_data(self, data):
         """Evaluate new data with our weights found during the
