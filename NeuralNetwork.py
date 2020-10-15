@@ -9,8 +9,9 @@ class NeuralNetwork():
     with given data, and plot the results.
     """
 
-    def __init__(self, K, tau, h, y0, d, c, I):
+    def __init__(self, K, tau, h, y0, d, c, I, scale=True):
         """Initialize vaiables from the parameters"""
+        self.scale = scale
         self.K = K  # number of layers
         self.tau = tau  # learning parameter
         self.h = h  # step length
@@ -25,10 +26,12 @@ class NeuralNetwork():
         self.w = np.random.randn(self.d, 1)
         self.mu = np.random.randn(1)  # parameter for the last hidden layer
         self.c = c  # vector of given data points
-        self.alpha = 0  # parameter used for minmax scaling
-        self.beta = 1  # parameter used for minmax scaling
+        self.alpha = 0.2  # parameter used for minmax scaling
+        self.beta = 0.8  # parameter used for minmax scaling
 
-        self.scale_input()
+        if self.scale:
+            self.scale_input()
+
         self.embed()
 
     def embed(self):
@@ -76,11 +79,19 @@ class NeuralNetwork():
 
     def hypothesis_function(self, x):
         """Hypothesis function, could be omitted"""
-        return 1 / 2 * (1 + np.tanh(x / 2))
+        if self.scale:
+            return 1 / 2 * (1 + np.tanh(x / 2))
+        else:
+            return x
 
     def hypothesis_function_derivated(self, x):
         """Derivative of the hypothesis function"""
-        return 1/4*(1-np.tanh(x/2)**2)
+        if self.scale:
+            return 1/4*(1-np.tanh(x/2)**2)
+        else:
+            return 1/4*(1-np.tanh(x/2)**2)
+            # return # np.full(shape=np.shape(x), fill_value=0.021)
+
 
     def transformation(self, y, k):
         """Function which maps from one layer to the next in the
@@ -127,6 +138,7 @@ class NeuralNetwork():
         print("K:", self.K)
         print("tau:", self.tau)
         print("d0", self.d0)
+
         print("I:", self.I)
         print("y0:", self.y0)
         print("c:", self.c)
@@ -135,13 +147,14 @@ class NeuralNetwork():
 
     def get_P_km1(self, k):
         """One step when back propagating to find P"""
-        return self.P[k + 1] + self.h * np.transpose(self.W[k]) @ (self.activation_function_derivated(self.W[k] @ self.Z[k] + self.b[k]) * self.P[k + 1])
+        return self.P[k + 1] + self.h * np.transpose(self.W[k]) @ (self.activation_function_derivated(
+            self.W[k] @ self.Z[k] + self.b[k]) * self.P[k + 1])
 
     def dJ_dW(self):  # get dJ/dW which is element of theta
         dJ_dW = np.zeros(np.shape(self.W))
         for k in range(self.K - 1):
-            dJ_dW[k] = self.h * (self.P[k + 1] * self.activation_function_derivated(
-                self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k]))
+            dJ_dW[k] = self.h * self.P[k + 1] * self.activation_function_derivated(
+                self.W[k] @ self.Z[k] + self.b[k]) @ np.transpose(self.Z[k])
         return dJ_dW
 
     def dJ_db(self):  # get dJ/db which is element of theta
@@ -222,11 +235,13 @@ class NeuralNetwork():
         """Evaluate new data with our weights found during the
         training phase"""
         self.y0 = data
-        self.scale_y0()
+        if self.scale:
+            self.scale_y0()
         self.embed()
         self.initialize_Z()
         self.initialize_yps()
-        self.scale_up_solution()
+        if self.scale:
+            self.scale_up_solution()
 
 
 # One step of the adam gradient decent for one parameter

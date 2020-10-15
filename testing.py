@@ -33,20 +33,25 @@ def test_with_known_functions():
         domain: [-2, 2] x [-2, 2]"""
         return 1/2*(y[0]**2 + y[1]**2)
 
-    iterations = 500
-    I = 500
+    def S(y):
+        """
+        d0:2
+        d :4
+        domain: Exclude origin"""
+        return -(1 / (np.sqrt(y[0]**2 + y[1]**2)))
+
+    iterations = 1000
+    I = 1000
     y0 = np.random.uniform(-2, 2, I)
     K = 15
     h = 0.1
     d = 2
-    tau = 0.1
+    tau = 0.08
     c = F(y0)
     c = c.reshape((I, 1))
-    network = NeuralNetwork(K, tau, h, y0, d, c, I)
-
+    network = NeuralNetwork(K, tau, h, y0, d, c, I, scale=True)
     # Train the model using the vanilla gradient descent
     network.train_vanilla(iterations)
-    print(network.cost[-1] / I)
     # Plot the cost function
     network.plot_cost()
     plt.grid(True)
@@ -60,6 +65,7 @@ def test_with_known_functions():
     plt.scatter(data, network.yps, marker='.', c="r", s=7, label="Model solution")
     plt.xlabel(r'$y$')
     plt.grid(True)
+    plt.legend()
     plt.savefig("./plots/test_solution_F(y)_vanilla.pdf", bbox_inches="tight")
 
 
@@ -117,8 +123,77 @@ def test_with_known_functions():
     plt.savefig("./plots/test_solution_H(y)_vanilla.pdf", bbox_inches="tight")
 
 
+    y1 = np.random.uniform(-10, 10, I)
+    y2 = np.random.uniform(-10, 10, I)
+    y0 = np.array([y1, y2])
+    K = 20
+    h = 0.08
+    tau = 0.08
+    d = 4
+    c = S(y0)
+    c = c.reshape((I, 1))
+
+    nn = NeuralNetwork(K, tau, h, y0, d, c, I)
+    # Train the model
+    nn.train_vanilla(iterations)
+    # Plot the cost function
+    nn.plot_cost()
+    plt.grid(True)
+    plt.savefig("./plots/cost_func_S(y)_vanilla.pdf", bbox_inches="tight")
+
+    data1 = np.random.uniform(-1, 1, I)
+    data2 = np.random.uniform(-1, 1, I)
+    data = np.array([data1, data2])
+    nn.evaluate_data(data)
+    print(nn.cost[-1])
+
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.plot_trisurf(data1, data2, S([data1, data2]), alpha=0.4)
+    ax.scatter3D(data1, data2, nn.yps, c='r', label='Model solution')
+    ax.set_xlabel(r'$y_1$')
+    ax.set_ylabel(r'$y_2$')
+    ax.legend()
+    plt.savefig("./plots/test_solution_S(y)_vanilla.pdf", bbox_inches="tight")
+
+
+def test_method():
+    def F(y):
+        """
+        d0:1
+        d: 2
+        domain: [-2, 2]"""
+        return 1/2 * y**2
+
+    iterations = 1000
+    I = 1000
+    y0 = np.random.uniform(-2, 2, I)
+    K = 10
+    h = 0.1
+    d = 2
+    tau = 0.08
+    c = F(y0)
+    c = c.reshape((I, 1))
+    network = NeuralNetwork(K, tau, h, y0, d, c, I, scale=True)
+    # Train the model using the vanilla gradient descent
+    network.train_adams_descent(iterations)
+    # Plot the cost function
+    network.plot_cost()
+    plt.grid(True)
+    network.scale_up_solution()
+    data = np.random.uniform(-2, 2, I)
+    x = np.linspace(-2, 2)
+    plt.figure()
+    plt.plot(x, F(x), label="Exact solution")
+    plt.scatter(y0, network.yps, marker='.', c="r", s=7, label="Model solution")
+    plt.xlabel(r'$y$')
+    plt.grid(True)
+    plt.show()
+
 def main():
-    test_with_known_functions()
+    #test_with_known_functions()
+
+
 
 
 if __name__ == "__main__":
