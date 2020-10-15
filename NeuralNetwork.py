@@ -238,6 +238,10 @@ class NeuralNetwork():
         """Evaluate new data with our weights found during the
         training phase"""
         self.y0 = data
+        if self.d0 == 1:
+            self.I = len(data)
+        else:
+            self.I = len(data[0])
         if self.scale:
             self.scale_y0()
         self.embed()
