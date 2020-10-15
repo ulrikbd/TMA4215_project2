@@ -191,7 +191,7 @@ def test_method():
     plt.show()
 
 def main():
-    #test_with_known_functions()
+    test_with_known_functions()
 
 
 
