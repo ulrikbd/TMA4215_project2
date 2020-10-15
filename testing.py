@@ -145,7 +145,6 @@ def test_with_known_functions():
     data2 = np.random.uniform(-1, 1, I)
     data = np.array([data1, data2])
     nn.evaluate_data(data)
-    print(nn.cost[-1])
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
@@ -168,30 +167,31 @@ def test_method():
     iterations = 1000
     I = 1000
     y0 = np.random.uniform(-2, 2, I)
-    K = 10
-    h = 0.1
+    K = 20
+    h = 0.07
     d = 2
     tau = 0.08
     c = F(y0)
     c = c.reshape((I, 1))
-    network = NeuralNetwork(K, tau, h, y0, d, c, I, scale=True)
+    network = NeuralNetwork(K, tau, h, y0, d, c, I)
     # Train the model using the vanilla gradient descent
     network.train_adams_descent(iterations)
     # Plot the cost function
     network.plot_cost()
     plt.grid(True)
-    network.scale_up_solution()
-    data = np.random.uniform(-2, 2, I)
+
+    data = np.random.uniform(-2, 2, 20)
+    network.evaluate_data(data)
     x = np.linspace(-2, 2)
     plt.figure()
     plt.plot(x, F(x), label="Exact solution")
-    plt.scatter(y0, network.yps, marker='.', c="r", s=7, label="Model solution")
+    plt.scatter(data, network.yps, marker='.', c="r", s=7, label="Model solution")
     plt.xlabel(r'$y$')
     plt.grid(True)
     plt.show()
 
 def main():
-    #test_with_known_functions()
+    test_with_known_functions()
 
 
 
