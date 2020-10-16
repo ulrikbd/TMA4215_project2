@@ -134,7 +134,7 @@ def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time):
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/ares_K.pdf", bbox_inches="tight")
+    plt.savefig("./plots/ares_K_adam.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(K_vec, KF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
@@ -143,7 +143,7 @@ def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time):
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/rtime_K.pdf", bbox_inches="tight")
+    plt.savefig("./plots/rtime_K_adam.pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -156,7 +156,7 @@ def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time):
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/ares_tau.pdf", bbox_inches="tight")
+    plt.savefig("./plots/ares_tau_adam.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(tau_vec, tauF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
@@ -165,7 +165,7 @@ def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time):
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/rtime_tau.pdf", bbox_inches="tight")
+    plt.savefig("./plots/rtime_tau_adam.pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -178,7 +178,7 @@ def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time):
     plt.ylabel('Average residual')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/ares_d.pdf", bbox_inches="tight")
+    plt.savefig("./plots/ares_d_adam.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(d_vec, dF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
@@ -187,7 +187,7 @@ def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time):
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/rtime_d.pdf", bbox_inches="tight")
+    plt.savefig("./plots/rtime_d_adam.pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -200,7 +200,7 @@ def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time):
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/ares_h.pdf", bbox_inches="tight")
+    plt.savefig("./plots/ares_h_adam.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(h_vec, hF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
@@ -209,7 +209,7 @@ def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time):
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/rtime_h.pdf", bbox_inches="tight")
+    plt.savefig("./plots/rtime_h_adam.pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -218,7 +218,6 @@ def test_parameters(method):
     """
     Create a network and plot the results using functions above."""
     # Fixed values
-    Iterations = 500
     K = 12
     h = 0.4
     d = 3
@@ -232,7 +231,6 @@ def test_parameters(method):
     iterations = 500
     I = 500
     y0 = np.random.uniform(-2, 2, I)
-    y0.sort()  # ta vekk?
     cF = F(y0)
     cF = cF.reshape((I, 1))
     cG = G(y0)
@@ -255,8 +253,8 @@ def test_parameters(method):
     dG_cost, dG_time = test_d(K, tau, h, y0, d_vec, cG, I, iterations, method)
     plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time)
 
-test_parameters(test_and_train_vanilla)
-#test_parameters(test_and_train_adam)
+#test_parameters(test_and_train_vanilla)
+test_parameters(test_and_train_adam)
 
 
 """
@@ -275,6 +273,23 @@ def random_test( y0, c, I, iterations, method):
     nn = NeuralNetwork(random_K, random_tau, random_h, y0, random_d, c, I)
     res = method(nn, iterations, I)
     return np.array([random_K, random_tau, random_h, random_d, res])
+
+
+def fixed_test(K, tau, h, d, method, n):
+    """
+    Create a neural network of given parameter values.
+    test and train the network and calculate the belonging average residual.
+    Use to test a good result from the random tests."""
+    iterations = 500
+    I = 500
+    y0 = np.random.uniform(-2, 2, I)
+    c = F(y0)
+    c = c.reshape((I, 1))
+    res_arr = np.zeros(n)
+    for i in range(n):
+        nn = NeuralNetwork(K, tau, h, y0, d, c, I)
+        res_arr[i] = method(nn, iterations, I)
+    return res_arr
 
 
 def n_random_test(N, method):
@@ -316,11 +331,11 @@ def print_random_test(result, all, i):
         print('K:', K[i], '\nτ:', tau[i], '\nh:', h[i], '\nd:', d[i],'\nAverage residual:',res[i])
 
 
-def test_random_parameters(method):
+def test_random_parameters(method, N):
     """
-    20 random tests for the function F. The best test (lowest average residual) and the worst test
+    N random tests for the function F. The best test (lowest average residual) and the worst test
     (highest average residual) is printed with belonging parameter values."""
-    result = n_random_test(20, method)
+    result = n_random_test(N, method)
     print_random_test(result, True, 0)
 
     print('\nBest')
@@ -331,9 +346,11 @@ def test_random_parameters(method):
     j = np.where(result[4,:] == np.amax(result[4,:]))  # worst
     print_random_test(result, False, j)
 
-print('Vanilla')
-test_random_parameters(test_and_train_vanilla)
 
-print('Adam')
-test_random_parameters(test_and_train_adam)
+
+#print('Adam')
+#test_random_parameters(test_and_train_adam, 200)
+
+#res = fixed_test(13, 0.45, 0.27, 4, test_and_train_adam, 20)
+#print(np.mean(res))
 
