@@ -28,7 +28,7 @@ def test_and_train_vanilla(network, iterations, I):
     """
     For a network, train with vanilla and test it on new data.
     Returns the residual of the final test on the new data points."""
-    network.vanilla(iterations)
+    network.train_vanilla(iterations)
     data = np.random.uniform(-2, 2, I)
     network.evaluate_data(data)
     solution = F(data)
@@ -49,7 +49,7 @@ SYSTEMATIC TEST
 """
 
 
-def test_K(K_vector, tau, h, y0, d, c, I, iterations):
+def test_K(K_vector, tau, h, y0, d, c, I, iterations, method):
     """
     Fix all parameters but th enumer of hidden layers, K. Let K take values from a range,
     and train and test network using the different number of hidden layers. Measure the
@@ -60,7 +60,7 @@ def test_K(K_vector, tau, h, y0, d, c, I, iterations):
     for K in K_vector:
         start = timeit.default_timer()
         network = NeuralNetwork(K, tau, h, y0, d, c, I)
-        res = test_and_train_adam(network, iterations, I)
+        res = method(network, iterations, I)
         cost_vec[i] = res
         stop = timeit.default_timer()
         time_vector[i] = stop - start
@@ -68,7 +68,7 @@ def test_K(K_vector, tau, h, y0, d, c, I, iterations):
     return cost_vec, time_vector
 
 
-def test_tau(K, tau_vector, h, y0, d, c, I, iterations):
+def test_tau(K, tau_vector, h, y0, d, c, I, iterations, method):
     """
     Fix all parameters but the learning parameter, tau. Let tau take values from a range,
     and train and test network using the different learning parameters. Measure the
@@ -79,7 +79,7 @@ def test_tau(K, tau_vector, h, y0, d, c, I, iterations):
     for tau in tau_vector:
         start = timeit.default_timer()
         network = NeuralNetwork(K, tau, h, y0, d, c, I)
-        res = test_and_train_adam(network, iterations, I)
+        res = method(network, iterations, I)
         cost_vec[i] = res
         stop = timeit.default_timer()
         time_vector[i] = stop - start
@@ -87,7 +87,7 @@ def test_tau(K, tau_vector, h, y0, d, c, I, iterations):
     return cost_vec, time_vector
 
 
-def test_h(K, tau, h_vector, y0, d, c, I, iterations):
+def test_h(K, tau, h_vector, y0, d, c, I, iterations, method):
     """
     Fix all parameters but the step lenght, h. Let h take values from a range,
     and train and test network using the different step lengths. Measure the
@@ -98,7 +98,7 @@ def test_h(K, tau, h_vector, y0, d, c, I, iterations):
     for h in h_vector:
         start = timeit.default_timer()
         network = NeuralNetwork(K, tau, h, y0, d, c, I)
-        res = test_and_train_adam(network, iterations, I)
+        res = method(network, iterations, I)
         cost_vec[i] = res
         stop = timeit.default_timer()
         time_vector[i] = stop - start
@@ -106,7 +106,7 @@ def test_h(K, tau, h_vector, y0, d, c, I, iterations):
     return cost_vec, time_vector
 
 
-def test_d(K, tau, h, y0, d_vector, c, I, iterations):
+def test_d(K, tau, h, y0, d_vector, c, I, iterations, method):
     """
     Fix all parameters but the dimension. Let d take values from a range,
     and train and test network using the different dimensions. Measure the
@@ -117,7 +117,7 @@ def test_d(K, tau, h, y0, d_vector, c, I, iterations):
     for d in d_vector:
         start = timeit.default_timer()
         network = NeuralNetwork(K, tau, h, y0, d, c, I)
-        res = test_and_train_adam(network, iterations, I)
+        res = method(network, iterations, I)
         cost_vec[i] = res
         stop = timeit.default_timer()
         time_vector[i] = stop - start
@@ -135,6 +135,7 @@ def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time):
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
+    plt.savefig("./plots/ares_K.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(K_vec, KF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
@@ -144,6 +145,7 @@ def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time):
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
+    plt.savefig("./plots/rtime_K.pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -157,6 +159,7 @@ def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time):
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
+    plt.savefig("./plots/ares_tau.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(tau_vec, tauF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
@@ -166,6 +169,7 @@ def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time):
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
+    plt.savefig("./plots/rtime_tau.pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -179,6 +183,7 @@ def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time):
     plt.ylabel('Average residual')
     plt.legend()
     plt.grid(True)
+    plt.savefig("./plots/ares_d.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(d_vec, dF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
@@ -188,6 +193,7 @@ def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time):
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
+    plt.savefig("./plots/rtime_d.pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -201,6 +207,7 @@ def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time):
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
+    plt.savefig("./plots/ares_h.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(h_vec, hF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
@@ -210,11 +217,12 @@ def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time):
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
+    plt.savefig("./plots/rtime_h.pdf", bbox_inches="tight")
     plt.show()
 
 
 # Testing different values for the parameters and evaluating run time
-def test_parameters():
+def test_parameters(method):
     """
     Create a network and plot the results using functions above."""
     # Fixed values
@@ -238,24 +246,25 @@ def test_parameters():
     cG = G(y0)
     cG = cG.reshape((I, 1))
 
-    KF_cost, KF_time = test_K(K_vec, tau, h, y0, d, cF, I, iterations)
-    KG_cost, KG_time = test_K(K_vec, tau, h, y0, d, cG, I, iterations)
+    KF_cost, KF_time = test_K(K_vec, tau, h, y0, d, cF, I, iterations, method)
+    KG_cost, KG_time = test_K(K_vec, tau, h, y0, d, cG, I, iterations, method)
     plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time)
 
-    tauF_cost, tauF_time = test_tau(K, tau_vec, h, y0, d, cF, I, iterations)
-    tauG_cost, tauG_time = test_tau(K, tau_vec, h, y0, d, cG, I, iterations)
-    plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time)
+    if method == test_and_train_vanilla:
+        tauF_cost, tauF_time = test_tau(K, tau_vec, h, y0, d, cF, I, iterations, method)
+        tauG_cost, tauG_time = test_tau(K, tau_vec, h, y0, d, cG, I, iterations, method)
+        plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time)
 
-    hF_cost, hF_time = test_h(K, tau, h_vec, y0, d, cF, I, iterations)
-    hG_cost, hG_time = test_h(K, tau, h_vec, y0, d, cG, I, iterations)
+    hF_cost, hF_time = test_h(K, tau, h_vec, y0, d, cF, I, iterations, method)
+    hG_cost, hG_time = test_h(K, tau, h_vec, y0, d, cG, I, iterations, method)
     plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time)
 
-    dF_cost, dF_time = test_d(K, tau, h, y0, d_vec, cF, I, iterations)
-    dG_cost, dG_time = test_d(K, tau, h, y0, d_vec, cG, I, iterations)
+    dF_cost, dF_time = test_d(K, tau, h, y0, d_vec, cF, I, iterations, method)
+    dG_cost, dG_time = test_d(K, tau, h, y0, d_vec, cG, I, iterations, method)
     plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time)
 
-
-test_parameters()
+test_parameters(test_and_train_vanilla)
+#test_parameters(test_and_train_adam)
 
 
 """
@@ -263,7 +272,7 @@ RANDOM TEST
 """
 
 
-def random_test( y0, c, I, iterations):
+def random_test( y0, c, I, iterations, method):
     """
     Generate random values for the parameters and create a neural network.
     test and train the network and calculate the belonging average residual. """
@@ -272,11 +281,11 @@ def random_test( y0, c, I, iterations):
     random_h = round(random.uniform( 0.15, 0.5), 2)
     random_d = random.randint(2, 4)
     nn = NeuralNetwork(random_K, random_tau, random_h, y0, random_d, c, I)
-    res = test_and_train_adam(nn, iterations, I)
+    res = method(nn, iterations, I)
     return np.array([random_K, random_tau, random_h, random_d, res])
 
 
-def n_random_test(N):
+def n_random_test(N, method):
     """
     Do n random test using random_test() and store the trials in the array result."""
     iterations = 500
@@ -287,7 +296,7 @@ def n_random_test(N):
     c = c.reshape((I, 1))
     result = np.zeros((5, N))
     for i in range(N):
-        result[:,i] = random_test(y0, c, I, iterations)
+        result[:,i] = random_test(y0, c, I, iterations, method)
     x = np.linspace(0,N+1,N)
     K = result[0, :]
     tau = result[1, :]
@@ -315,11 +324,11 @@ def print_random_test(result, all, i):
         print('K:', K[i], '\nτ:', tau[i], '\nh:', h[i], '\nd:', d[i],'\nAverage residual:',res[i])
 
 
-def test_random_parameters():
+def test_random_parameters(method):
     """
     20 random tests for the function F. The best test (lowest average residual) and the worst test
     (highest average residual) is printed with belonging parameter values."""
-    result = n_random_test(20)
+    result = n_random_test(20, method)
     print_random_test(result, True, 0)
 
     print('\nBest')
@@ -330,6 +339,9 @@ def test_random_parameters():
     j = np.where(result[4,:] == np.amax(result[4,:]))  # worst
     print_random_test(result, False, j)
 
+print('Vanilla')
+test_random_parameters(test_and_train_vanilla)
 
-test_random_parameters()
+print('Adam')
+test_random_parameters(test_and_train_adam)
 
