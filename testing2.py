@@ -130,7 +130,6 @@ def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time):
     Plot the result from test_K() for both F(y) and G(y). """
     plt.plot(K_vec, KF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(K_vec, KG_cost, label=r'$G(y)=1-\cos(y)$')
-    plt.title('Average residual as function of layers')
     plt.xlabel('number of layers, K')
     plt.ylabel('average residual')
     plt.legend()
@@ -140,7 +139,6 @@ def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time):
 
     plt.plot(K_vec, KF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(K_vec, KG_time, label=r'$G(y)=1-\cos(y)$')
-    plt.title('Run time as function of layers')
     plt.xlabel('number of layers, K')
     plt.ylabel('runtime [sek]')
     plt.legend()
@@ -154,7 +152,6 @@ def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time):
     Plot the result from test_tau() for both F(y) and G(y). """
     plt.plot(tau_vec, tauF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(tau_vec, tauG_cost, label=r'$G(y)=1-\cos(y)$')
-    plt.title(r'Average residual as function of $\tau$')
     plt.xlabel('learning parameter,' + r'$\tau$')
     plt.ylabel('average residual')
     plt.legend()
@@ -164,7 +161,6 @@ def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time):
 
     plt.plot(tau_vec, tauF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(tau_vec, tauG_time, label=r'$G(y)=1-\cos(y)$')
-    plt.title(r'Run time as function of $\tau$')
     plt.xlabel('learning parameter,' + r'$\tau$')
     plt.ylabel('runtime [sek]')
     plt.legend()
@@ -178,7 +174,6 @@ def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time):
     Plot the result from test_d() for both F(y) and G(y). """
     plt.plot(d_vec, dF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(d_vec, dG_cost, label=r'$G(y)=1-\cos(y)$')
-    plt.title('Average residual as function of dimension')
     plt.xlabel('dimensions, d')
     plt.ylabel('Average residual')
     plt.legend()
@@ -188,7 +183,6 @@ def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time):
 
     plt.plot(d_vec, dF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(d_vec, dG_time, label=r'$G(y)=1-\cos(y)$')
-    plt.title('Run time as function of dimension')
     plt.xlabel('dimensions,d')
     plt.ylabel('runtime [sek]')
     plt.legend()
@@ -202,7 +196,6 @@ def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time):
     Plot the result from test_h() for both F(y) and G(y). """
     plt.plot(h_vec, hF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(h_vec, hG_cost, label=r'$G(y)=1-\cos(y)$')
-    plt.title(r'Average residual as function of h')
     plt.xlabel('step length, h')
     plt.ylabel('average residual')
     plt.legend()
@@ -212,7 +205,6 @@ def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time):
 
     plt.plot(h_vec, hF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(h_vec, hG_time, label=r'$G(y)=1-\cos(y)$')
-    plt.title('Run time as function of step length, h')
     plt.xlabel('step length, h')
     plt.ylabel('runtime [sek]')
     plt.legend()
