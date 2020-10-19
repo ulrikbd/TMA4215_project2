@@ -317,34 +317,49 @@ def test_parameters(method, method2d, names):
     dS_cost, dS_time = test_d(K, tau, h, y0_2d, d_vec, cS, I, iterations, method2d, S)
     plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time, dH_cost, dH_time, dS_cost, dS_time, names)
 
-names_adam = ["./plots/ares_K_adam.pdf", "./plots/rtime_K_adam.pdf", "./plots/ares_tau_adam.pdf", "./plots/rtime_tau_adam.pdf", "./plots/ares_d_adam.pdf", "./plots/rtime_d_adam.pdf", "./plots/ares_h_adam.pdf", "./plots/rtime_h_adam.pdf"]
-names_vanilla = ["./plots/ares_K.pdf", "./plots/rtime_K.pdf", "./plots/ares_tau.pdf", "./plots/rtime_tau.pdf", "./plots/ares_d.pdf", "./plots/rtime_d.pdf", "./plots/ares_h.pdf", "./plots/rtime_h.pdf"]
-test_parameters(test_and_train_vanilla, test_and_train_vanilla_2d,  names_vanilla)
-test_parameters(test_and_train_adam, test_and_train_adam_2d, names_adam)
+#names_adam = ["./plots/ares_K_adam.pdf", "./plots/rtime_K_adam.pdf", "./plots/ares_tau_adam.pdf", "./plots/rtime_tau_adam.pdf", "./plots/ares_d_adam.pdf", "./plots/rtime_d_adam.pdf", "./plots/ares_h_adam.pdf", "./plots/rtime_h_adam.pdf"]
+#names_vanilla = ["./plots/ares_K.pdf", "./plots/rtime_K.pdf", "./plots/ares_tau.pdf", "./plots/rtime_tau.pdf", "./plots/ares_d.pdf", "./plots/rtime_d.pdf", "./plots/ares_h.pdf", "./plots/rtime_h.pdf"]
+#test_parameters(test_and_train_vanilla, test_and_train_vanilla_2d,  names_vanilla)
+#test_parameters(test_and_train_adam, test_and_train_adam_2d, names_adam)
 
-# make a choise:
-K = 12
-h = 0.15
-d = 4
-"""
-def evaluation_network():
-    K = 12
+
+def compare_methods():
+    K = 10
     h = 0.2
-    d = 3
+    d = 4
     tau = 0.08
     iterations = 500
     I = 500
     y0 = np.random.uniform(-2, 2, I)
-    cF = F(y0)
-    cF = cF.reshape((I, 1))
     cG = G(y0)
     cG = cG.reshape((I, 1))
+    N_adam = NeuralNetwork(K, tau, h, y0, d, cG, I)
+    N_vanilla = NeuralNetwork(K, tau, h, y0, d, cG, I)
+    N_adam.train_adams_descent(iterations)
+    N_vanilla.train_vanilla(iterations)
+    plt.plot(np.linspace(0, iterations, len(N_adam.cost)), N_adam.cost, label='Adam')
+    plt.plot(np.linspace(0, iterations, len(N_vanilla.cost)), N_vanilla.cost, label='Vanilla')
+    plt.xlabel('iterations')
+    plt.ylabel(r'$J(\theta)$')
+    plt.legend()
+    plt.savefig('./plots/adam_vs_vanilla.pdf', bbox_inches="tight")
+    plt.show()
+    data = np.random.uniform(-2, 2, I)
+    N_adam.evaluate_data(data)
+    N_vanilla.evaluate_data(data)
+    solution = G(data)
+    solution = solution.reshape((I, 1))
+    adam_res = N_adam.get_average_residual(solution)
+    vanilla_res = N_vanilla.get_average_residual(solution)
+    print('Average residual for Adam gradient decent:',adam_res)
+    print('Average residual for Vanilla gradient method:',vanilla_res)
+    return adam_res, vanilla_res
 
 
+adam_res, vanilla_res = compare_methods()
 
 
-
-
+"""
 RANDOM TEST 
 """
 

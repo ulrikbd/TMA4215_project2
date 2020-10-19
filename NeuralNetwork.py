@@ -184,6 +184,7 @@ class NeuralNetwork():
         plt.xlabel("Iterations")
         plt.ylabel(r'$J(\theta)$')
 
+
     def train_vanilla(self, iterations):
         """Training the model using the vanilla gradient method"""
         self.cost = np.zeros(iterations)  # Initialize storage for the cost
