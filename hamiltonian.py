@@ -86,17 +86,19 @@ def get_T():
     y0 = data["P"]
     d = 6
     I = len(y0[1])
-    iterations = 200
+    iterations = 20
     K = 12
     h = 0.08
     tau = 0.08
     c = data["T"]
     c = c.reshape((I, 1))
-
+    point = y0[:,0]
+    point = point.reshape((3, 1))
+    print(point)
     T = NeuralNetwork(K, tau, h, y0, d, c, I)
     T.train_adams_descent(iterations)
     T.plot_cost()
-    plt.show()
+    print((T.compute_gradient(point)))
     print(T.cost[-1] / I)
 
 
