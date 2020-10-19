@@ -43,6 +43,11 @@ def F(y):
 def G(y):
     return 1 - np.cos(y)
 
+def H(y):
+    return 1/2*(y[0]**2 + y[1]**2)
+
+def S(y):
+    return -(1 / (np.sqrt(y[0]**2 + y[1]**2)))
 
 """
 SYSTEMATIC TEST
@@ -125,91 +130,107 @@ def test_d(K, tau, h, y0, d_vector, c, I, iterations, method):
     return cost_vec, time_vector
 
 
-def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time):
+def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time, KH_cost, KH_time, KS_cost, KS_time):
     """
     Plot the result from test_K() for both F(y) and G(y). """
     plt.plot(K_vec, KF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(K_vec, KG_cost, label=r'$G(y)=1-\cos(y)$')
+    plt.plot(K_vec, KH_cost, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
+    plt.plot(K_vec, KS_cost, label=r'$S(y)=- \frac{1}{y_{1}^{2} + y_{2}^{2}}$')
     plt.xlabel('number of layers, K')
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/ares_K_adam.pdf", bbox_inches="tight")
+    #plt.savefig("./plots/ares_K_adam.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(K_vec, KF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(K_vec, KG_time, label=r'$G(y)=1-\cos(y)$')
+    plt.plot(K_vec, KH_time, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
+    plt.plot(K_vec, KS_time, label=r'$S(y)=- \frac{1}{y_{1}^{2} + y_{2}^{2}}$')
     plt.xlabel('number of layers, K')
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/rtime_K_adam.pdf", bbox_inches="tight")
+    #plt.savefig("./plots/rtime_K_adam.pdf", bbox_inches="tight")
     plt.show()
 
 
-def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time):
+def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time, tauH_cost, tauH_time, tauS_cost, tauS_time):
     """
     Plot the result from test_tau() for both F(y) and G(y). """
     plt.plot(tau_vec, tauF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(tau_vec, tauG_cost, label=r'$G(y)=1-\cos(y)$')
+    plt.plot(tau_vec, tauH_cost, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
+    plt.plot(tau_vec, tauS_cost, label=r'$S(y)=- \frac{1}{y_{1}^{2} + y_{2}^{2}}$')
     plt.xlabel('learning parameter,' + r'$\tau$')
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/ares_tau_adam.pdf", bbox_inches="tight")
+    #plt.savefig("./plots/ares_tau_adam.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(tau_vec, tauF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(tau_vec, tauG_time, label=r'$G(y)=1-\cos(y)$')
+    plt.plot(tau_vec, tauH_time, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
+    plt.plot(tau_vec, tauS_time, label=r'$S(y)=- \frac{1}{y_{1}^{2} + y_{2}^{2}}$')
     plt.xlabel('learning parameter,' + r'$\tau$')
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/rtime_tau_adam.pdf", bbox_inches="tight")
+    #plt.savefig("./plots/rtime_tau_adam.pdf", bbox_inches="tight")
     plt.show()
 
 
-def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time):
+def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time, dH_cost, dH_time, dS_cost, dS_time):
     """
     Plot the result from test_d() for both F(y) and G(y). """
     plt.plot(d_vec, dF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(d_vec, dG_cost, label=r'$G(y)=1-\cos(y)$')
+    plt.plot(d_vec, dH_cost, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
+    plt.plot(d_vec, dS_cost, label=r'$S(y)=- \frac{1}{y_{1}^{2} + y_{2}^{2}}$')
     plt.xlabel('dimensions, d')
     plt.ylabel('Average residual')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/ares_d_adam.pdf", bbox_inches="tight")
+    #plt.savefig("./plots/ares_d_adam.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(d_vec, dF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(d_vec, dG_time, label=r'$G(y)=1-\cos(y)$')
+    plt.plot(d_vec, dH_time, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
+    plt.plot(d_vec, dS_time, label=r'$S(y)=- \frac{1}{y_{1}^{2} + y_{2}^{2}}$')
     plt.xlabel('dimensions,d')
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/rtime_d_adam.pdf", bbox_inches="tight")
+    #plt.savefig("./plots/rtime_d_adam.pdf", bbox_inches="tight")
     plt.show()
 
 
-def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time):
+def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time, hH_cost, hH_time, hS_cost, hS_time):
     """
     Plot the result from test_h() for both F(y) and G(y). """
     plt.plot(h_vec, hF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(h_vec, hG_cost, label=r'$G(y)=1-\cos(y)$')
+    plt.plot(h_vec, hH_cost, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
+    plt.plot(h_vec, hS_cost, label=r'$S(y)=- \frac{1}{y_{1}^{2} + y_{2}^{2}}$')
     plt.xlabel('step length, h')
     plt.ylabel('average residual')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/ares_h_adam.pdf", bbox_inches="tight")
+    #plt.savefig("./plots/ares_h_adam.pdf", bbox_inches="tight")
     plt.show()
 
     plt.plot(h_vec, hF_time, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(h_vec, hG_time, label=r'$G(y)=1-\cos(y)$')
+    plt.plot(h_vec, hH_time, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
+    plt.plot(h_vec, hS_time, label=r'$S(y)=- \frac{1}{y_{1}^{2} + y_{2}^{2}}$')
     plt.xlabel('step length, h')
     plt.ylabel('runtime [sek]')
     plt.legend()
     plt.grid(True)
-    plt.savefig("./plots/rtime_h_adam.pdf", bbox_inches="tight")
+    #plt.savefig("./plots/rtime_h_adam.pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -220,7 +241,7 @@ def test_parameters(method):
     # Fixed values
     K = 12
     h = 0.4
-    d = 3
+    d = 4
     tau = 0.1
     # Varied variables
     K_vec = np.linspace(3, 21, 19, dtype=int)
@@ -231,33 +252,65 @@ def test_parameters(method):
     iterations = 500
     I = 500
     y0 = np.random.uniform(-2, 2, I)
+    y1 = np.random.uniform(-2, 2, I)
+    y2 = np.random.uniform(-2, 2, I)
+    y0_2d = np.array([y1, y2])
+    cF = F(y0)
+    cF = cF.reshape((I, 1))
+    cG = G(y0)
+    cG = cG.reshape((I, 1))
+    cH = H(y0_2d)
+    cH = cH.reshape((I, 1))
+    cS = S(y0_2d)
+    cS = cS.reshape((I, 1))
+
+    KF_cost, KF_time = test_K(K_vec, tau, h, y0, d, cF, I, iterations, method)
+    KG_cost, KG_time = test_K(K_vec, tau, h, y0, d, cG, I, iterations, method)
+    KH_cost, KH_time = test_K(K_vec, tau, h, y0, d, cH, I, iterations, method)
+    KS_cost, KS_time = test_K(K_vec, tau, h, y0, d, cS, I, iterations, method)
+    plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time, KH_cost, KH_time, KS_cost, KS_time)
+
+    if method == test_and_train_vanilla:
+        tauF_cost, tauF_time = test_tau(K, tau_vec, h, y0, d, cF, I, iterations, method)
+        tauG_cost, tauG_time = test_tau(K, tau_vec, h, y0, d, cG, I, iterations, method)
+        tauH_cost, tauH_time = test_tau(K, tau_vec, h, y0, d, cH, I, iterations, method)
+        tauS_cost, tauS_time = test_tau(K, tau_vec, h, y0, d, cS, I, iterations, method)
+        plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time, tauH_cost, tauH_time, tauS_cost, tauS_time)
+
+    hF_cost, hF_time = test_h(K, tau, h_vec, y0, d, cF, I, iterations, method)
+    hG_cost, hG_time = test_h(K, tau, h_vec, y0, d, cG, I, iterations, method)
+    hH_cost, hH_time = test_h(K, tau, h_vec, y0, d, cH, I, iterations, method)
+    hS_cost, hS_time = test_h(K, tau, h_vec, y0, d, cS, I, iterations, method)
+    plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time, hH_cost, hH_time, hS_cost, hS_time)
+
+    dF_cost, dF_time = test_d(K, tau, h, y0, d_vec, cF, I, iterations, method)
+    dG_cost, dG_time = test_d(K, tau, h, y0, d_vec, cG, I, iterations, method)
+    dH_cost, dH_time = test_d(K, tau, h, y0, d_vec, cH, I, iterations, method)
+    dS_cost, dS_time = test_d(K, tau, h, y0, d_vec, cS, I, iterations, method)
+    plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time, dH_cost, dH_time, dS_cost, dS_time)
+
+test_parameters(test_and_train_vanilla)
+test_parameters(test_and_train_adam)
+
+"""
+def evaluation_network():
+    K = 12
+    h = 0.2
+    d = 3
+    tau = 0.08
+    iterations = 500
+    I = 500
+    y0 = np.random.uniform(-2, 2, I)
     cF = F(y0)
     cF = cF.reshape((I, 1))
     cG = G(y0)
     cG = cG.reshape((I, 1))
 
-    KF_cost, KF_time = test_K(K_vec, tau, h, y0, d, cF, I, iterations, method)
-    KG_cost, KG_time = test_K(K_vec, tau, h, y0, d, cG, I, iterations, method)
-    plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time)
-
-    if method == test_and_train_vanilla:
-        tauF_cost, tauF_time = test_tau(K, tau_vec, h, y0, d, cF, I, iterations, method)
-        tauG_cost, tauG_time = test_tau(K, tau_vec, h, y0, d, cG, I, iterations, method)
-        plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time)
-
-    hF_cost, hF_time = test_h(K, tau, h_vec, y0, d, cF, I, iterations, method)
-    hG_cost, hG_time = test_h(K, tau, h_vec, y0, d, cG, I, iterations, method)
-    plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time)
-
-    dF_cost, dF_time = test_d(K, tau, h, y0, d_vec, cF, I, iterations, method)
-    dG_cost, dG_time = test_d(K, tau, h, y0, d_vec, cG, I, iterations, method)
-    plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time)
-
-#test_parameters(test_and_train_vanilla)
-test_parameters(test_and_train_adam)
 
 
-"""
+
+
+
 RANDOM TEST 
 """
 
