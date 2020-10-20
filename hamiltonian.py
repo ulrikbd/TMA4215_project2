@@ -102,4 +102,31 @@ def get_T():
     print(T.cost[-1] / I)
 
 
-get_T()
+def plot_hamiltionian():
+    data = concatenate(0, 1)
+    t = data["t"]
+    T = data["T"]
+    V = data["V"]
+    plt.plot(t, T, label=r'$T(t)$')
+    plt.plot(t, V, label=r'$V(t)$')
+    plt.xlabel("t")
+    plt.legend()
+    plt.show()
+
+
+
+
+
+def test_sympletic_euler():
+    data = concatenate(0, 1)
+    t = data["t"]
+    T = data["T"]
+    V = data["V"]
+
+
+def main():
+    plot_hamiltionian()
+
+
+if __name__ == "__main__":
+    main()

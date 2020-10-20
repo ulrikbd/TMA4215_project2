@@ -255,11 +255,8 @@ class NeuralNetwork():
         """Computes the gradient for the function
         that the network is approximating"""
         self.evaluate_data(data)
-        
-        print(np.shape(np.transpose(self.w)))
-        print(np.shape(self.Z[-1]))
-        print(np.shape(self.mu))
-        A = self.hypothesis_function(np.transpose(self.w) @ self.Z[-1] +
+
+        A = self.hypothesis_function_derivated(np.transpose(self.w) @ self.Z[-1] +
             self.mu * np.ones(shape=(1, self.I))) * self.w
 
         for k in range(self.K, 0, -1):
@@ -288,4 +285,11 @@ def simple_scheme(U, dU, tau):
     """One step of the vanilla gradient method to optimize
     weights and bias, for one parameter"""
     return U - tau * dU
+
+def sympletic_euler_step(q, p, T, V, h):
+    """One step in the sympletic euler method where T and V
+    are neural networks"""
+    q = q + h * T.compute_gradient(p)
+    p = p - h * T.compute_gradient(q)
+    return q, p
 
