@@ -356,8 +356,53 @@ def compare_methods():
     return adam_res, vanilla_res
 
 
-adam_res, vanilla_res = compare_methods()
+#adam_res, vanilla_res = compare_methods()
 
+
+def test_data_points():
+    K = 10
+    h = 0.2
+    d = 4
+    tau = 0.08
+    iterations = 500
+    I = np.arange(50, 1000, 100)
+    n = len(I)
+    res = np.zeros(n)
+    time_vector = np.zeros(n)
+    j = 0
+    for i in I:
+        start = timeit.default_timer()
+        y0 = np.random.uniform(-2, 2, i)
+        cG = G(y0)
+        cG = cG.reshape((i, 1))
+        N = NeuralNetwork(K, tau, h, y0, d, cG, i)
+        N.train_adams_descent(iterations)
+        data = np.random.uniform(-2, 2, i)
+        N.evaluate_data(data)
+        solution = G(data)
+        solution = solution.reshape((i, 1))
+        res[j] = N.get_average_residual(solution)
+        stop = timeit.default_timer()
+        time_vector[j] = stop - start
+        j = j + 1
+    plt.plot(I, res)
+    plt.xlabel('data points')
+    plt.ylabel('Average residual')
+    plt.savefig('./plots/ares_images.pdf', bbox_inches="tight")
+    plt.show()
+
+    plt.plot(I, time_vector)
+    plt.xlabel('data points')
+    plt.ylabel('run time [sek]')
+    plt.savefig('./plots/rtime_images.pdf', bbox_inches="tight")
+    plt.show()
+
+
+
+
+
+
+test_data_points()
 
 """
 RANDOM TEST 
