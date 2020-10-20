@@ -251,6 +251,20 @@ class NeuralNetwork():
         if self.scale:
             self.scale_up_solution()
 
+    def compute_gradient(self, data):
+        """Computes the gradient for the function
+        that the network is approximating"""
+        self.evaluate_data(data)
+
+        A = self.hypothesis_function_derivated(np.transpose(self.w) @ self.Z[-1] +
+            self.mu * np.ones(shape=(1, self.I))) * self.w
+
+        for k in range(self.K, 0, -1):
+            A = A + self.h * np.transpose(self.W[k - 1]) @ (
+                self.activation_function_derivated(self.W[k - 1] @ self.Z[k -1]
+                + self.b[k - 1]) * A)
+        return A
+
 
 # One step of the adam gradient decent for one parameter
 def adam_descent_step(U, dU, j, m, v):
@@ -271,4 +285,11 @@ def simple_scheme(U, dU, tau):
     """One step of the vanilla gradient method to optimize
     weights and bias, for one parameter"""
     return U - tau * dU
+
+def sympletic_euler_step(q, p, T, V, h):
+    """One step in the sympletic euler method where T and V
+    are neural networks"""
+    q = q + h * T.compute_gradient(p)
+    p = p - h * T.compute_gradient(q)
+    return q, p
 

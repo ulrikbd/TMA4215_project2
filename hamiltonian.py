@@ -86,18 +86,47 @@ def get_T():
     y0 = data["P"]
     d = 6
     I = len(y0[1])
-    iterations = 200
+    iterations = 20
     K = 12
     h = 0.08
     tau = 0.08
     c = data["T"]
     c = c.reshape((I, 1))
-
+    point = y0[:,0]
+    point = point.reshape((3, 1))
+    print(point)
     T = NeuralNetwork(K, tau, h, y0, d, c, I)
     T.train_adams_descent(iterations)
     T.plot_cost()
-    plt.show()
+    print((T.compute_gradient(point)))
     print(T.cost[-1] / I)
 
 
-get_T()
+def plot_hamiltionian():
+    data = concatenate(0, 1)
+    t = data["t"]
+    T = data["T"]
+    V = data["V"]
+    plt.plot(t, T, label=r'$T(t)$')
+    plt.plot(t, V, label=r'$V(t)$')
+    plt.xlabel("t")
+    plt.legend()
+    plt.show()
+
+
+
+
+
+def test_sympletic_euler():
+    data = concatenate(0, 1)
+    t = data["t"]
+    T = data["T"]
+    V = data["V"]
+
+
+def main():
+    plot_hamiltionian()
+
+
+if __name__ == "__main__":
+    main()
