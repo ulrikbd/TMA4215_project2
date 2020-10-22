@@ -128,6 +128,8 @@ def test_T():
     plt.figure()
     plt.plot(t, c)
     plt.plot(t, T.yps, 'r.')
+    plt.xlabel('time')
+    plt.ylabel('(T(p))(t)')
     plt.show()
     res = T.get_average_residual(c)
     print(r'T(p)')
@@ -159,6 +161,8 @@ def test_V():
     plt.figure()
     plt.plot(t, c)
     plt.plot(t, V.yps, 'r.')
+    plt.xlabel('time')
+    plt.ylabel('(V(q))(t)')
     plt.show()
     res = V.get_average_residual(c)
     print(r'V(q)')
@@ -186,7 +190,7 @@ def test_sympletic_euler():
 
 
 def main():
-    #test_T()
+    test_T()
     test_V()
 
 
