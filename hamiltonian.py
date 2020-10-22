@@ -5,7 +5,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import csv
 from ast import literal_eval
 import re
+import timeit
 from hamiltonian_functions import NonlinearPendulum, HenonHeiles
+
 
 plt.style.use('seaborn')
 """
@@ -109,6 +111,73 @@ def get_T():
 
 
 
+def test_T():
+    data = concatenate(0, 20)
+    p0 = data["P"]
+    I = len(p0[1])
+    iterations = 200
+    d = 4
+    K = 9
+    h = 0.2
+    tau = 0.08
+    c = data["T"]
+    c = c.reshape((I, 1))
+    start = timeit.default_timer()
+    T = NeuralNetwork(K, tau, h, p0, d, c, I)
+    T.train_adams_descent(iterations)
+    stop = timeit.default_timer()
+    time = round(stop - start, 4)
+    T.plot_cost()
+    test_data = generate_data()
+    p = test_data["P"]
+    t = test_data["t"]
+    c = test_data["T"]
+    T.evaluate_data(p)
+    plt.figure()
+    plt.plot(t, c)
+    plt.plot(t, T.yps, 'r.')
+    plt.xlabel('time')
+    plt.ylabel('(T(p))(t)')
+    plt.show()
+    res = T.get_average_residual(c)
+    print(r'T(p)')
+    print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations)
+    print('Average residual = ',res,'\ntime:',time,'sek')
+
+def test_V():
+    data = concatenate(0, 10)
+    q0 = data["Q"]
+    d = 8
+    I = len(q0[1])
+    iterations = 300
+    K = 14
+    h = 0.1
+    tau = 0.08
+    c = data["V"]
+    c = c.reshape((I, 1))
+    start = timeit.default_timer()
+    V = NeuralNetwork(K, tau, h, q0, d, c, I)
+    V.train_adams_descent(iterations)
+    stop = timeit.default_timer()
+    time = round(stop - start, 4)
+    V.plot_cost()
+    test_data = generate_data()
+    q = test_data["Q"]
+    t = test_data["t"]
+    c = test_data["V"]
+    V.evaluate_data(q)
+    plt.figure()
+    plt.plot(t, c)
+    plt.plot(t, V.yps, 'r.')
+    plt.xlabel('time')
+    plt.ylabel('(V(q))(t)')
+    plt.show()
+    res = V.get_average_residual(c)
+    print(r'V(q)')
+    print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations)
+    print('Average residual = ',res,'\ntime:',time,'sek')
+
+
 def plot_hamiltionian():
     data = generate_data(23)
     t = data["t"]
@@ -128,6 +197,14 @@ def plot_hamiltonian_position():
     ax = plt.axes(projection='3d')
     ax.plot(p[0], p[1], p[2])
     plt.show()
+
+
+def test_sympletic_euler():
+    data = concatenate(0, 1)
+    t = data["t"]
+    T = data["T"]
+    V = data["V"]
+
 
 def test_sympletic_euler_pendumlum():
     H = NonlinearPendulum(m=2, l=5)
@@ -184,6 +261,7 @@ def test_stormer_verner_henon_heiles():
     plt.savefig("./plots/henon_heiles_sv_low_energy.pdf", bbox_inches="tight")
     plt.show()
 
+
     H = HenonHeiles()
     h = 0.001
     t = np.arange(0, 20, h)
@@ -210,7 +288,12 @@ def test_stormer_verner_henon_heiles():
     plt.show()
 
 def main():
+
+    test_T()
+    test_V()
+
     get_T()
+
 
 
 if __name__ == "__main__":

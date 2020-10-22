@@ -398,11 +398,8 @@ def test_data_points():
     plt.show()
 
 
+#test_data_points()
 
-
-
-
-test_data_points()
 
 """
 RANDOM TEST 

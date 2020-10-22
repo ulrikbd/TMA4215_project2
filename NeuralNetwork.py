@@ -182,6 +182,7 @@ class NeuralNetwork():
         plt.grid(True)
         plt.xlabel("Iterations")
         plt.ylabel(r'$J(\theta)$')
+        plt.show()
 
 
     def train_vanilla(self, iterations):
