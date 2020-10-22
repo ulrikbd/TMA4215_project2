@@ -237,7 +237,11 @@ class NeuralNetwork():
             self.cost[i - 1] = self.objective_function()
 
         self.y0 = input
+        self.I = len(self.y0[0])
         self.c = c_store
+        self.initialize_Z()
+        self.initialize_yps()
+        self.initialize_P()
 
     def train_adams_descent(self, iterations):
         """Training the model using the adams descent algorithm
