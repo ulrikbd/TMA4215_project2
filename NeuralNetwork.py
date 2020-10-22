@@ -15,7 +15,6 @@ class NeuralNetwork():
         self.K = K  # number of layers
         self.tau = tau  # learning parameter
         self.h = h  # step length
-        self.input = y0  # storing the initial input data
         self.y0 = y0  # input data
         self.I = I  # number of data points
         self.d = d  # dimension of the hidden layers
@@ -31,8 +30,8 @@ class NeuralNetwork():
 
         if self.scale:
             self.scale_input()
-
         self.embed()
+
 
     def embed(self):
         """Embed starting values into a higher dimension"""
@@ -203,6 +202,44 @@ class NeuralNetwork():
 
             self.cost[i] = self.objective_function()
 
+    def train_stochastic_gradient_descent(self, iterations, chunk_size):
+        """Training the model using the stochasti gradient descent"""
+        self.cost = np.zeros(iterations)
+
+        input = self.y0  # storing the initial input data
+        c_store = self.c # storing the known values
+
+        m_mu = 0
+        v_mu = 0
+        m_w = np.zeros(np.shape(self.w))
+        v_w = np.zeros(np.shape(self.w))
+        m_W = np.zeros(np.shape(self.W))
+        v_W = np.zeros(np.shape(self.W))
+        m_b = np.zeros(np.shape(self.b))
+        v_b = np.zeros(np.shape(self.b))
+
+        for i in range(1, iterations + 1):
+            indices = np.random.choice(len(input[0]), chunk_size, replace=False)
+            self.y0 = input[:, indices]
+            self.c = c_store[indices]
+            self.I = chunk_size
+            self.initialize_Z()
+            self.initialize_yps()
+            self.initialize_P()
+            # Get theta values
+            dJ_dW, dJ_db, dJ_dw, dJ_dmu = self.get_theta()
+
+            self.W, m_W, v_W = adam_descent_step(self.W, dJ_dW, i, m_W, v_W)
+            self.b, m_b, v_b = adam_descent_step(self.b, dJ_db, i, m_b, v_b)
+            self.w, m_w, v_w = adam_descent_step(self.w, dJ_dw, i, m_w, v_w)
+            self.mu, m_mu, v_mu = adam_descent_step(
+                self.mu, dJ_dmu, i, m_mu, v_mu)
+
+            self.cost[i - 1] = self.objective_function()
+
+        self.y0 = input
+        self.c = c_store
+
     def train_adams_descent(self, iterations):
         """Training the model using the adams descent algorithm
         for optimization"""
@@ -231,6 +268,8 @@ class NeuralNetwork():
                 self.mu, dJ_dmu, i, m_mu, v_mu)
 
             self.cost[i - 1] = self.objective_function()
+
+
 
     def get_average_residual(self, value):
         residual = np.absolute(self.yps - value)
@@ -264,7 +303,7 @@ class NeuralNetwork():
             A = A + self.h * np.transpose(self.W[k - 1]) @ (
                 self.activation_function_derivated(self.W[k - 1] @ self.Z[k -1]
                 + self.b[k - 1]) * A)
-        return A
+        return A[self.d0]
 
 
 # One step of the adam gradient decent for one parameter
@@ -287,10 +326,17 @@ def simple_scheme(U, dU, tau):
     weights and bias, for one parameter"""
     return U - tau * dU
 
-def sympletic_euler_step(q, p, T, V, h):
-    """One step in the sympletic euler method where T and V
-    are neural networks"""
-    q = q + h * T.compute_gradient(p)
-    p = p - h * T.compute_gradient(q)
+def sympletic_euler_step(q, p, dT_dp, dV_dq, h):
+    """One step in the sympletic euler method"""
+    q = q + h * dT_dp(p)
+    p = p - h * dV_dq(q)
+    return q, p
+
+
+def stormer_verlet_step(q, p, dT_dp, dV_dq, h):
+    """One step in the Stormer-Verlet method"""
+    p = p - h/2 * dV_dq(q)
+    q = q + h * dT_dp(p)
+    p = p - h/2 * dV_dq(q)
     return q, p
 
