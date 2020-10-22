@@ -1,10 +1,11 @@
-from NeuralNetwork import NeuralNetwork, adam_descent_step, simple_scheme
+from NeuralNetwork import NeuralNetwork, adam_descent_step, simple_scheme, sympletic_euler_step, stormer_verlet_step
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import csv
 from ast import literal_eval
 import re
+from hamiltonian_functions import NonlinearPendulum, HenonHeiles
 
 plt.style.use('seaborn')
 """
@@ -103,7 +104,7 @@ def get_T():
 
 
 def plot_hamiltionian():
-    data = concatenate(0, 1)
+    data = generate_data(23)
     t = data["t"]
     T = data["T"]
     V = data["V"]
@@ -113,19 +114,97 @@ def plot_hamiltionian():
     plt.legend()
     plt.show()
 
-
-
-
-
-def test_sympletic_euler():
-    data = concatenate(0, 1)
+def plot_hamiltonian_position():
+    data = generate_data(0)
     t = data["t"]
-    T = data["T"]
-    V = data["V"]
+    p = data["P"]
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.plot(p[0], p[1], p[2])
+    plt.show()
 
+def test_sympletic_euler_pendumlum():
+    H = NonlinearPendulum(m=2, l=5)
+    h = 0.001
+    t = np.arange(0, 20, h)
+    p = np.zeros(len(t))
+    q = np.zeros(len(t))
+    p[0] = 0
+    q[0] = np.pi / 4
+    for n in range(1, len(t)):
+        q[n], p[n] = sympletic_euler_step(q[n-1], p[n-1], H.dT_dp, H.dV_dq, h)
+    plt.figure()
+    plt.plot(t, p, '.', label=r'$p, [p]=m/s$')
+    plt.plot(t, q, '.', label=r'$q,[q]=rad$')
+    plt.xlabel("t")
+    plt.legend()
+    plt.savefig("./plots/nonlinear_pendulum_sympletic_euler.pdf", bbox_inches="tight")
+
+
+    fig = plt.figure()
+    ax = plt.axes(projection= "3d")
+    ax.set_xlabel(r'$p$')
+    ax.set_ylabel(r'$q$')
+    H_values = H.V(q) + H.T(p)
+    plt.plot(p, q, H_values, '.', label=r'$H(q,p)$')
+    plt.legend()
+    plt.savefig("./plots/nonlinear_pendulum_sympletic_euler_hamiltonian.pdf", bbox_inches="tight")
+    print((max(H_values)-min(H_values))/max(H_values))
+    plt.show()
+
+def test_stormer_verner_henon_heiles():
+    H = HenonHeiles()
+    h = 0.001
+    t = np.arange(0, 20, h)
+    p = np.zeros(shape=(2, len(t)))
+    q = np.zeros(shape=(2, len(t)))
+    p[:, 0] = np.array([0.1, 0.1])
+    q[:, 0] = np.array([0, 0])
+    for n in range(1, len(t)):
+        q[:, n], p[:, n] = stormer_verlet_step(
+            q[:, n-1], p[:, n-1], H.dT_dp, H.dV_dq, h)
+
+
+    H_values = H.V(q) + H.T(p)
+    H_avg = np.mean(H_values)
+    fig = plt.figure()
+    ax = plt.axes(projection="3d")
+    plt.plot(q[0], q[1], p[0], label=r'$p_1, \quad \dot{x}$')
+    plt.plot(q[0], q[1], p[1], label=r'$p_2, \quad \dot{y}$')
+    ax.set_xlabel(r'$q_1, \quad x$')
+    ax.set_ylabel(r'$q_2, \quad y$')
+    ax.set_title(r'$H=$' + str(round(H_avg, 4)))
+    plt.legend()
+    plt.savefig("./plots/henon_heiles_sv_low_energy.pdf", bbox_inches="tight")
+    plt.show()
+
+    H = HenonHeiles()
+    h = 0.001
+    t = np.arange(0, 20, h)
+    p = np.zeros(shape=(2, len(t)))
+    q = np.zeros(shape=(2, len(t)))
+    p[:, 0] = np.array([0.4, 0.4])
+    q[:, 0] = np.array([0, 0])
+    for n in range(1, len(t)):
+        q[:, n], p[:, n] = stormer_verlet_step(
+            q[:, n-1], p[:, n-1], H.dT_dp, H.dV_dq, h)
+
+
+    H_values = H.V(q) + H.T(p)
+    H_avg = np.mean(H_values)
+    fig = plt.figure()
+    ax = plt.axes(projection="3d")
+    plt.plot(q[0], q[1], p[0], label=r'$p_1, \quad \dot{x}$')
+    plt.plot(q[0], q[1], p[1], label=r'$p_2, \quad \dot{y}$')
+    ax.set_xlabel(r'$q_1, \quad x$')
+    ax.set_ylabel(r'$q_2, \quad y$')
+    ax.set_title(r'$H=$' + str(round(H_avg, 4)))
+    plt.legend()
+    plt.savefig("./plots/henon_heiles_sv_high_energy.pdf", bbox_inches="tight")
+    plt.show()
 
 def main():
-    plot_hamiltionian()
+    test_stormer_verner_henon_heiles()
 
 
 if __name__ == "__main__":
