@@ -83,24 +83,27 @@ print(np.shape(data["V"]))
 
 
 def get_T():
-    data = concatenate(0, 1)
+    data = concatenate(0, 50)
     y0 = data["P"]
-    d = 6
+    d = 9
     I = len(y0[1])
-    iterations = 20
-    K = 12
-    h = 0.08
+    iterations = 500
+    K = 20
+    h = 0.1
     tau = 0.08
+    chunk_size = 1000
     c = data["T"]
     c = c.reshape((I, 1))
-    point = y0[:,0]
-    point = point.reshape((3, 1))
-    print(point)
     T = NeuralNetwork(K, tau, h, y0, d, c, I)
-    T.train_adams_descent(iterations)
+    T.train_stochastic_gradient_descent(iterations, chunk_size)
     T.plot_cost()
-    print((T.compute_gradient(point)))
-    print(T.cost[-1] / I)
+
+    test_data = generate_data(batch=24)
+    T.evaluate_data(test_data["P"])
+    residual = T.get_average_residual(test_data["T"])
+    print(residual)
+    plt.show()
+
 
 
 def plot_hamiltionian():
@@ -204,7 +207,7 @@ def test_stormer_verner_henon_heiles():
     plt.show()
 
 def main():
-    test_stormer_verner_henon_heiles()
+    get_T()
 
 
 if __name__ == "__main__":
