@@ -85,15 +85,15 @@ print(np.shape(data["V"]))
 
 
 def get_T():
-    data = concatenate(1, 2)
+    data = concatenate(0, 20)
     y0 = data["P"]
     d = 9
     I = len(y0[1])
     iterations = 500
-    K = 20
+    K = 15
     h = 0.1
     tau = 0.08
-    chunk_size = 1000
+    chunk_size = 500
     c = data["T"]
     c = c.reshape((I, 1))
     T = NeuralNetwork(K, tau, h, y0, d, c, I)
@@ -104,6 +104,9 @@ def get_T():
     T.evaluate_data(test_data["P"])
     residual = T.get_average_residual(test_data["T"])
     print(residual)
+    plt.figure()
+    plt.plot(test_data["t"], test_data["T"])
+    plt.plot(test_data["t"], T.yps, 'r.')
     plt.show()
 
 
