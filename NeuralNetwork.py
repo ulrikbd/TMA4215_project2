@@ -91,7 +91,6 @@ class NeuralNetwork():
             return 1/4*(1-np.tanh(x/2)**2)
             # return # np.full(shape=np.shape(x), fill_value=0.021)
 
-
     def transformation(self, y, k):
         """Function which maps from one layer to the next in the
         neural networks"""
@@ -184,7 +183,6 @@ class NeuralNetwork():
         plt.ylabel(r'$J(\theta)$')
         plt.show()
 
-
     def train_vanilla(self, iterations):
         """Training the model using the vanilla gradient method"""
         self.cost = np.zeros(iterations)  # Initialize storage for the cost
@@ -272,8 +270,6 @@ class NeuralNetwork():
                 self.mu, dJ_dmu, i, m_mu, v_mu)
 
             self.cost[i - 1] = self.objective_function()
-
-
 
     def get_average_residual(self, value):
         residual = np.absolute(self.yps - value)
