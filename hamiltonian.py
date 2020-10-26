@@ -110,7 +110,7 @@ def get_T():
     plt.show()
 
 
-def test_T(batch):
+def test_T(batch, plot_name):
     data = concatenate(0, 50)
     p0 = data["P"]
     I = len(p0[1])
@@ -135,10 +135,13 @@ def test_T(batch):
     c = c.reshape((len(t), 1))
     T.evaluate_data(p)
     plt.figure()
-    plt.plot(t, c)
-    plt.plot(t, T.yps, 'r.')
+    plt.plot(t, c, label='exact')
+    plt.plot(t, T.yps, 'r.', label='network')
     plt.xlabel('time')
     plt.ylabel('(T(p))(t)')
+    #plt.legend()
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    #plt.savefig(plot_name, bbox_inches="tight")
     plt.show()
     res = round(T.get_average_residual(c), 5)
     print(r'T(p)')
@@ -146,7 +149,7 @@ def test_T(batch):
     print('Last cost:',round(T.cost[-1],3),'\nAverage residual = ',res,'\ntime:',time,'sek\n')
     return res
 
-def test_V(batch):
+def test_V(batch, plot_name):
     data = concatenate(0, 50)
     q0 = data["Q"]
     d = 7
@@ -171,16 +174,61 @@ def test_V(batch):
     c = c.reshape((len(t), 1))
     V.evaluate_data(q)
     plt.figure()
-    plt.plot(t, c)
-    plt.plot(t, V.yps, 'r.')
+    plt.plot(t, c, label='exact')
+    plt.plot(t, V.yps,'r.', label='network')
     plt.xlabel('time')
     plt.ylabel('(V(q))(t)')
+    plt.legend()
+    #plt.savefig(plot_name, bbox_inches="tight")
     plt.show()
     res = round(V.get_average_residual(c), 5)
     print(r'V(q)')
     print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations,'\nchunk size:',chunk_size)
     print('Last cost:',round(V.cost[-1],3),'\nAverage residual = ',res,'\ntime:',time,'sek\n')
     return res
+
+def test_V_and_T(batch, plot_name):
+    data = concatenate(0, 50)
+    p0 = data["P"]
+    q0 = data["Q"]
+    Ip = len(p0[1])
+    Iq = len(q0[1])
+    iterations = 600
+    chunk_size = 50
+    d = 7
+    K = 15
+    h = 0.2
+    tau = 0.08
+    cT = data["T"]
+    cT = cT.reshape((Ip, 1))
+    cV = data["V"]
+    cV = cV.reshape((Iq, 1))
+    T = NeuralNetwork(K, tau, h, p0, d, cT, Ip)
+    T.train_stochastic_gradient_descent(iterations, chunk_size)
+    V = NeuralNetwork(K, tau, h, q0, d, cV, Iq)
+    V.train_stochastic_gradient_descent(iterations, chunk_size)
+    test_data = generate_data(batch)
+    p = test_data["P"]
+    q = test_data["Q"]
+    t = test_data["t"]
+    cV = test_data["V"]
+    cT = test_data["T"]
+    c = cV + cT
+    c = c.reshape((len(t), 1))
+    T.evaluate_data(p)
+    V.evaluate_data(q)
+    plt.figure()
+    plt.plot(t, c, label='exact')
+    plt.plot(t, T.yps + V.yps, 'r.', label='network')
+    plt.xlabel('time')
+    plt.ylabel('(T(p))(t) + (V(q))(t)')
+    plt.legend()
+    #plt.savefig(plot_name, bbox_inches="tight")
+    plt.show()
+    resT = round(T.get_average_residual(c), 5)
+    resV = round(V.get_average_residual(c), 5)
+    print(resT, resV)
+
 
 def find_best_worst_test():
     Batch = np.linspace(1,49,49,dtype='int')
@@ -315,18 +363,17 @@ def test_stormer_verner_henon_heiles():
     plt.savefig("./plots/henon_heiles_sv_high_energy.pdf", bbox_inches="tight")
     plt.show()
 
-def main():
-    #find_best_worst_test()
+def save_figs(): # fjerener denne når vi er ferdig?
     min_resT_batch = 3
     min_resV_batch = 32
     max_resT_batch = 37
-    max_resV_batch = 0
-    test_T(min_resT_batch)
-    test_V(min_resV_batch)
-    test_T(max_resT_batch)
-    test_V(max_resV_batch)
+    max_resV_batch = 0 # denne gir ganske bra resultat så tror ikke den er max
+    test_T(min_resT_batch, './plots/resT_min.pdf')
+    test_V(min_resV_batch, './plots/resV_min.pdf')
+    test_T(max_resT_batch, './plots/resT_max.pdf')
+    test_V(max_resV_batch, './plots/resV_max.pdf')
 
-
+def main():
 
 
 if __name__ == "__main__":
