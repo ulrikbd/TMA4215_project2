@@ -334,10 +334,27 @@ def sympletic_euler_step(q, p, dT_dp, dV_dq, h):
     return q, p
 
 
+def sympletic_euler_step_NN(q, p, T, V, h):
+    """One step in the sympletic euler method using the gradient
+    computed by the neural network model"""
+    q = q + h * T.cumpute_gradient(p)
+    p = p - h * V.compute_gradient(q)
+    return q, p
+
+
 def stormer_verlet_step(q, p, dT_dp, dV_dq, h):
     """One step in the Stormer-Verlet method"""
     p = p - h/2 * dV_dq(q)
     q = q + h * dT_dp(p)
     p = p - h/2 * dV_dq(q)
+    return q, p
+
+
+def stormer_verlet_step_NN(q, p, T, V, h):
+    """"One step in the størmer verlet method using the
+    gradient computed by the nueral network model"""
+    p = p - h/2 * V.compute_gradient(q)
+    q = q + h * T.compute_gradient(p)
+    p = p - h/2 * V.compute_gradient(q)
     return q, p
 

@@ -1,4 +1,8 @@
-from NeuralNetwork import NeuralNetwork, adam_descent_step, simple_scheme, sympletic_euler_step, stormer_verlet_step
+from NeuralNetwork import (
+    NeuralNetwork, adam_descent_step, simple_scheme,
+    sympletic_euler_step, stormer_verlet_step,
+    sympletic_euler_step_NN, stormer_verlet_step_NN,
+)
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -76,33 +80,28 @@ def concatenate(batchmin=0, batchmax=50):
     return {"t": tlist, "Q": Q_data, "P": P_data, "T": T0, "V": V0}
 
 
-data = generate_data()
-print(np.shape(data["t"]))
-print(np.shape(data["Q"]))
-print(np.shape(data["P"]))
-print(np.shape(data["T"]))
-print(np.shape(data["V"]))
-
-
 def get_T():
     data = concatenate(0, 50)
     y0 = data["P"]
-    d = 9
+    d = 6
     I = len(y0[1])
     iterations = 500
-    K = 15
+    K = 20
     h = 0.1
     tau = 0.08
-    chunk_size = 500
+
+    chunk_size = 4000
     c = data["T"]
     c = c.reshape((I, 1))
     T = NeuralNetwork(K, tau, h, y0, d, c, I)
     T.train_stochastic_gradient_descent(iterations, chunk_size)
-    T.plot_cost()
 
-    test_data = generate_data(batch=24)
+    test_data = generate_data(batch=28)
     T.evaluate_data(test_data["P"])
-    residual = T.get_average_residual(test_data["T"])
+    t = test_data["t"]
+    c = test_data["T"]
+    c = c.reshape((len(t), 1))
+    residual = T.get_average_residual(c)
     print(residual)
     plt.figure()
     plt.plot(test_data["t"], test_data["T"])
@@ -275,13 +274,6 @@ def plot_hamiltonian_position():
     plt.show()
 
 
-def test_sympletic_euler():
-    data = concatenate(0, 1)
-    t = data["t"]
-    T = data["T"]
-    V = data["V"]
-
-
 def test_sympletic_euler_pendumlum():
     H = NonlinearPendulum(m=2, l=5)
     h = 0.001
@@ -363,6 +355,7 @@ def test_stormer_verner_henon_heiles():
     plt.savefig("./plots/henon_heiles_sv_high_energy.pdf", bbox_inches="tight")
     plt.show()
 
+
 def save_figs(): # fjerener denne når vi er ferdig?
     min_resT_batch = 3
     min_resV_batch = 32
@@ -373,7 +366,66 @@ def save_figs(): # fjerener denne når vi er ferdig?
     test_T(max_resT_batch, './plots/resT_max.pdf')
     test_V(max_resV_batch, './plots/resV_max.pdf')
 
+
+def test_unknown_function():
+    """Testing how well our unknown Hamiltonian function behaves
+    with sympletic integral solvers, and the neural network computing
+    the gradients."""
+    data = concatenate(0, 50)
+    y0_T = data["P"]
+    y0_V = data["Q"]
+    d = 9
+    I = len(y0_T[0])
+    iterations = 1000
+    K = 15
+    h = 0.1
+    tau = 0.08
+
+    chunk_size = 400
+    c_T = data["T"]
+    c_T = c_T.reshape((I, 1))
+    c_V = data["V"]
+    c_V = c_V.reshape((I, 1))
+    T = NeuralNetwork(K, tau, h, y0_T, d, c_T, I)
+    V = NeuralNetwork(K, tau, h, y0_V, d, c_V, I)
+    T.train_stochastic_gradient_descent(iterations, chunk_size)
+    V.train_stochastic_gradient_descent(iterations, chunk_size)
+
+    test_data = generate_data(batch=28)
+    T.evaluate_data(test_data["P"])
+    V.evaluate_data(test_data["Q"])
+    t = test_data["t"]
+    plt.figure()
+    plt.plot(t, test_data["T"])
+    plt.plot(t, T.yps, 'r.')
+    plt.plot(t, test_data["V"])
+    plt.plot(t, V.yps, '.')
+    plt.show()
+
+    h = t[1] - t[0]
+    # Initialize storage for q and p
+    q = np.zeros(shape=np.shape(test_data["Q"]))
+    p = np.zeros(shape=np.shape(test_data["P"]))
+    q[:, 0] = test_data["Q"][:, 0]
+    p[:, 0] = test_data["P"][:, 0]
+    # Størmer-Verlet iterations
+    for n in range(1, len(t)):
+        q_temp, p_temp = stormer_verlet_step_NN(
+            q[:, n-1].reshape((3, 1)), p[:, n-1].reshape((3, 1)),
+            T, V, h
+        )
+        q[:, n] = q_temp.reshape((3))
+        p[:, n] = p_temp.reshape((3))
+
+    T.evaluate_data(p)
+    V.evaluate_data(q)
+    plt.figure()
+    plt.plot(t, T.yps, '.')
+    plt.plot(t, V.yps, '.')
+    plt.show()
+
 def main():
+    test_unknown_function()
 
 
 if __name__ == "__main__":
