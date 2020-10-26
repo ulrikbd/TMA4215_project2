@@ -85,7 +85,7 @@ print(np.shape(data["V"]))
 
 
 def get_T():
-    data = concatenate(0, 20)
+    data = concatenate(0, 50)
     y0 = data["P"]
     d = 9
     I = len(y0[1])
@@ -114,10 +114,10 @@ def test_T(batch):
     data = concatenate(0, 50)
     p0 = data["P"]
     I = len(p0[1])
-    iterations = 1000
-    chunk_size = 100
-    d = 10
-    K = 20
+    iterations = 600
+    chunk_size = 50
+    d = 7
+    K = 15
     h = 0.2
     tau = 0.08
     c = data["T"]
@@ -127,7 +127,7 @@ def test_T(batch):
     T.train_stochastic_gradient_descent(iterations, chunk_size)
     stop = timeit.default_timer()
     time = round(stop - start, 3)
-    T.plot_cost()
+    #T.plot_cost()
     test_data = generate_data(batch)
     p = test_data["P"]
     t = test_data["t"]
@@ -143,17 +143,17 @@ def test_T(batch):
     res = round(T.get_average_residual(c), 5)
     print(r'T(p)')
     print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations,'\nchunk size:',chunk_size)
-    print('Last cost:',round(T.cost[-1],3),'\nAverage residual = ',res,res**2,'\ntime:',time,'sek\n')
-
+    print('Last cost:',round(T.cost[-1],3),'\nAverage residual = ',res,'\ntime:',time,'sek\n')
+    return res
 
 def test_V(batch):
     data = concatenate(0, 50)
     q0 = data["Q"]
-    d = 10
+    d = 7
     I = len(q0[1])
-    iterations = 1000
+    iterations = 600
     chunk_size = 50
-    K = 20
+    K = 15
     h = 0.2
     tau = 0.08
     c = data["V"]
@@ -179,8 +179,31 @@ def test_V(batch):
     res = round(V.get_average_residual(c), 5)
     print(r'V(q)')
     print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations,'\nchunk size:',chunk_size)
-    print('Last cost:',round(V.cost[-1],3),'\nAverage residual = ',res,res**2,'\ntime:',time,'sek')
+    print('Last cost:',round(V.cost[-1],3),'\nAverage residual = ',res,'\ntime:',time,'sek\n')
+    return res
 
+def find_best_worst_test():
+    Batch = np.linspace(1,49,49,dtype='int')
+    min_resT = test_T(0)
+    min_resV = test_V(0)
+    max_resT = test_T(0)
+    max_resV = test_V(0)
+    for b in Batch:
+        resT = test_T(b)
+        resV = test_V(b)
+        if resT < min_resT:
+            min_resT = resT
+            print('Min residual T:',resT,'Batch number:',b)
+        if resT > max_resT:
+            max_resT = resT
+            print('Max residual T:',resT,'Batch number:',b)
+        if resV < min_resV:
+            min_resV = resV
+            print('Min Residual V:',resV,'Batch number:', b)
+        if resV > max_resV:
+            max_resV = resV
+            print('Max residual T:',resV,'Batch number:',b)
+    return min_resT, min_resV, max_resT, max_resV
 
 def plot_hamiltionian():
     data = generate_data(23)
@@ -293,9 +316,16 @@ def test_stormer_verner_henon_heiles():
     plt.show()
 
 def main():
-    test_T(28)
-    test_V(18)
-    #get_T()
+    #find_best_worst_test()
+    min_resT_batch = 3
+    min_resV_batch = 32
+    max_resT_batch = 37
+    max_resV_batch = 0
+    test_T(min_resT_batch)
+    test_V(min_resV_batch)
+    test_T(max_resT_batch)
+    test_V(max_resV_batch)
+
 
 
 
