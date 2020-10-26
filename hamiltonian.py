@@ -107,28 +107,29 @@ def get_T():
     plt.show()
 
 
-
-def test_T():
-    data = concatenate(0, 20)
+def test_T(batch):
+    data = concatenate(0, 50)
     p0 = data["P"]
     I = len(p0[1])
-    iterations = 200
-    d = 4
-    K = 9
+    iterations = 1000
+    chunk_size = 100
+    d = 10
+    K = 20
     h = 0.2
     tau = 0.08
     c = data["T"]
     c = c.reshape((I, 1))
     start = timeit.default_timer()
     T = NeuralNetwork(K, tau, h, p0, d, c, I)
-    T.train_adams_descent(iterations)
+    T.train_stochastic_gradient_descent(iterations, chunk_size)
     stop = timeit.default_timer()
-    time = round(stop - start, 4)
+    time = round(stop - start, 3)
     T.plot_cost()
-    test_data = generate_data()
+    test_data = generate_data(batch)
     p = test_data["P"]
     t = test_data["t"]
     c = test_data["T"]
+    c = c.reshape((len(t), 1))
     T.evaluate_data(p)
     plt.figure()
     plt.plot(t, c)
@@ -136,32 +137,35 @@ def test_T():
     plt.xlabel('time')
     plt.ylabel('(T(p))(t)')
     plt.show()
-    res = T.get_average_residual(c)
+    res = round(T.get_average_residual(c), 5)
     print(r'T(p)')
-    print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations)
-    print('Average residual = ',res,'\ntime:',time,'sek')
+    print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations,'\nchunk size:',chunk_size)
+    print('Last cost:',round(T.cost[-1],3),'\nAverage residual = ',res,res**2,'\ntime:',time,'sek\n')
 
-def test_V():
-    data = concatenate(0, 10)
+
+def test_V(batch):
+    data = concatenate(0, 50)
     q0 = data["Q"]
-    d = 8
+    d = 10
     I = len(q0[1])
-    iterations = 300
-    K = 14
-    h = 0.1
+    iterations = 1000
+    chunk_size = 50
+    K = 20
+    h = 0.2
     tau = 0.08
     c = data["V"]
     c = c.reshape((I, 1))
     start = timeit.default_timer()
     V = NeuralNetwork(K, tau, h, q0, d, c, I)
-    V.train_adams_descent(iterations)
+    V.train_stochastic_gradient_descent(iterations, chunk_size)
     stop = timeit.default_timer()
-    time = round(stop - start, 4)
+    time = round(stop - start, 3)
     V.plot_cost()
-    test_data = generate_data()
+    test_data = generate_data(batch)
     q = test_data["Q"]
     t = test_data["t"]
     c = test_data["V"]
+    c = c.reshape((len(t), 1))
     V.evaluate_data(q)
     plt.figure()
     plt.plot(t, c)
@@ -169,10 +173,10 @@ def test_V():
     plt.xlabel('time')
     plt.ylabel('(V(q))(t)')
     plt.show()
-    res = V.get_average_residual(c)
+    res = round(V.get_average_residual(c), 5)
     print(r'V(q)')
-    print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations)
-    print('Average residual = ',res,'\ntime:',time,'sek')
+    print('K:',K,'\nd:',d,'\nh:',h,'\ndata points:',I,'\niterations:',iterations,'\nchunk size:',chunk_size)
+    print('Last cost:',round(V.cost[-1],3),'\nAverage residual = ',res,res**2,'\ntime:',time,'sek')
 
 
 def plot_hamiltionian():
@@ -185,6 +189,7 @@ def plot_hamiltionian():
     plt.xlabel("t")
     plt.legend()
     plt.show()
+
 
 def plot_hamiltonian_position():
     data = generate_data(0)
@@ -285,11 +290,9 @@ def test_stormer_verner_henon_heiles():
     plt.show()
 
 def main():
-
-    test_T()
-    test_V()
-
-    get_T()
+    test_T(28)
+    test_V(18)
+    #get_T()
 
 
 
