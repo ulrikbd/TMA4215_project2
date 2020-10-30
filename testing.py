@@ -56,6 +56,7 @@ def test_with_known_functions():
     network.plot_cost()
     plt.grid(True)
     plt.savefig("./plots/cost_func_F(y)_vanilla.pdf", bbox_inches="tight")
+    plt.show()
 
     data = np.random.uniform(-2, 2, I)
     x = np.linspace(-2, 2)

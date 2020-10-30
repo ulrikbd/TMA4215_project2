@@ -421,7 +421,7 @@ def test_unknown_function():
     T.train_stochastic_gradient_descent(iterations, chunk_size)
     V.train_stochastic_gradient_descent(iterations, chunk_size)
 
-    test_data = generate_data(batch=32)  # 32 braish
+    test_data = generate_data(batch=32)
     T.evaluate_data(test_data["P"])
     V.evaluate_data(test_data["Q"])
     t = test_data["t"]
@@ -459,7 +459,7 @@ def test_unknown_function():
     ax.set_ylabel("y")
     ax.set_zlabel("z")
     ax.legend()
-    plt.savefig("./trajectories.pdf", bbox_inches="tight")
+    plt.savefig("./plots/trajectories.pdf", bbox_inches="tight")
     plt.show()
 
     T.evaluate_data(p)
@@ -478,7 +478,7 @@ def main():
     """Testing how well our unknown Hamiltonian function behaves
     with sympletic integral solvers, with the neural network computing
     the gradients."""
-    test_unknown_function()
+    # test_unknown_function()
     """Function which systematically iterates through different
     parameters to find the optimal ones for the unknown Hamiltonian
     function"""
