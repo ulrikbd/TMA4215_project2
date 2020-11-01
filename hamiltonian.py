@@ -109,8 +109,8 @@ def get_T():
     plt.show()
 
 
-def test_T(batch, plot_name):
-    data = concatenate(0, 50)
+def test_T(batch, plot_name, training_batch):
+    data = concatenate(0, training_batch)
     p0 = data["P"]
     I = len(p0[1])
     iterations = 600
@@ -148,8 +148,8 @@ def test_T(batch, plot_name):
     print('Last cost:',round(T.cost[-1],3),'\nAverage residual = ',res,'\ntime:',time,'sek\n')
     return res
 
-def test_V(batch, plot_name):
-    data = concatenate(0, 50)
+def test_V(batch, plot_name, training_batch):
+    data = concatenate(0, training_batch)
     q0 = data["Q"]
     d = 7
     I = len(q0[1])
@@ -186,8 +186,8 @@ def test_V(batch, plot_name):
     print('Last cost:',round(V.cost[-1],3),'\nAverage residual = ',res,'\ntime:',time,'sek\n')
     return res
 
-def test_V_and_T(batch, plot_name):
-    data = concatenate(0, 50)
+def test_V_and_T(batch, plot_name, training_batch):
+    data = concatenate(0, training_batch)
     p0 = data["P"]
     q0 = data["Q"]
     Ip = len(p0[1])
@@ -374,14 +374,14 @@ def test_unknown_function():
     data = concatenate(0, 50)
     y0_T = data["P"]
     y0_V = data["Q"]
-    d = 9
+    d = 7
     I = len(y0_T[0])
-    iterations = 1000
+    iterations = 700 #1000
     K = 15
-    h = 0.1
+    h = 0.15
     tau = 0.08
 
-    chunk_size = 400
+    chunk_size = 50 # 400
     c_T = data["T"]
     c_T = c_T.reshape((I, 1))
     c_V = data["V"]
@@ -390,6 +390,9 @@ def test_unknown_function():
     V = NeuralNetwork(K, tau, h, y0_V, d, c_V, I)
     T.train_stochastic_gradient_descent(iterations, chunk_size)
     V.train_stochastic_gradient_descent(iterations, chunk_size)
+    T.plot_cost()
+    V.plot_cost()
+
 
     test_data = generate_data(batch=28)
     T.evaluate_data(test_data["P"])
@@ -400,7 +403,13 @@ def test_unknown_function():
     plt.plot(t, T.yps, 'r.')
     plt.plot(t, test_data["V"])
     plt.plot(t, V.yps, '.')
+    plt.legend()
     plt.show()
+    resT = round(T.get_average_residual(test_data["T"]),4)
+    resV = round(V.get_average_residual(test_data["V"]),4)
+    print('batch:')
+    print('Average residual for T:', resT, '(',round(resT**2,4),')')
+    print('Average residual for V:', resV, '(',round(resV**2,4),')')
 
     h = t[1] - t[0]
     # Initialize storage for q and p
@@ -419,13 +428,25 @@ def test_unknown_function():
 
     T.evaluate_data(p)
     V.evaluate_data(q)
+    resT = round(T.get_average_residual(test_data["T"]),4)
+    resV = round(V.get_average_residual(test_data["V"]),4)
+    print('Gradient')
+    print('Average residual for T:', resT, '(',round(resT**2,4),')')
+    print('Average residual for V:', resV, '(',round(resV**2,4),')\n\n')
     plt.figure()
     plt.plot(t, T.yps, '.')
     plt.plot(t, V.yps, '.')
+    plt.legend()
     plt.show()
 
 def main():
-    test_unknown_function()
+    #test_unknown_function()
+    plot_name = '35_points'
+    test_T(3, plot_name, 40)
+    #test_V(37, plot_name, 40)
+    #test_V_and_T(24, plot_name, 40)
+
+
 
 
 if __name__ == "__main__":

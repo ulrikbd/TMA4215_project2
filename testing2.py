@@ -275,7 +275,7 @@ def test_parameters(method, method2d, names):
     K_vec = np.linspace(3, 21, 19, dtype=int)
     h_vec = np.linspace(0.01, 0.9, 10)
     d_vec = np.linspace(2, 8, 8, dtype=int)
-    tau_vec = np.linspace(0.001, 0.9, 20)
+    tau_vec = np.linspace(0.001, 0.2, 20)
 
     iterations = 500
     I = 500
@@ -317,17 +317,19 @@ def test_parameters(method, method2d, names):
     dS_cost, dS_time = test_d(K, tau, h, y0_2d, d_vec, cS, I, iterations, method2d, S)
     plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time, dH_cost, dH_time, dS_cost, dS_time, names)
 
-#names_adam = ["./plots/ares_K_adam.pdf", "./plots/rtime_K_adam.pdf", "./plots/ares_tau_adam.pdf", "./plots/rtime_tau_adam.pdf", "./plots/ares_d_adam.pdf", "./plots/rtime_d_adam.pdf", "./plots/ares_h_adam.pdf", "./plots/rtime_h_adam.pdf"]
-#names_vanilla = ["./plots/ares_K.pdf", "./plots/rtime_K.pdf", "./plots/ares_tau.pdf", "./plots/rtime_tau.pdf", "./plots/ares_d.pdf", "./plots/rtime_d.pdf", "./plots/ares_h.pdf", "./plots/rtime_h.pdf"]
-#test_parameters(test_and_train_vanilla, test_and_train_vanilla_2d,  names_vanilla)
-#test_parameters(test_and_train_adam, test_and_train_adam_2d, names_adam)
+
+def save_figs():
+    names_adam = ["./plots/ares_K_adam.pdf", "./plots/rtime_K_adam.pdf", "./plots/ares_tau_adam.pdf", "./plots/rtime_tau_adam.pdf", "./plots/ares_d_adam.pdf", "./plots/rtime_d_adam.pdf", "./plots/ares_h_adam.pdf", "./plots/rtime_h_adam.pdf"]
+    names_vanilla = ["./plots/ares_K.pdf", "./plots/rtime_K.pdf", "./plots/ares_tau.pdf", "./plots/rtime_tau.pdf", "./plots/ares_d.pdf", "./plots/rtime_d.pdf", "./plots/ares_h.pdf", "./plots/rtime_h.pdf"]
+    test_parameters(test_and_train_vanilla, test_and_train_vanilla_2d,  names_vanilla)
+    test_parameters(test_and_train_adam, test_and_train_adam_2d, names_adam)
 
 
 def compare_methods():
     K = 10
-    h = 0.2
-    d = 4
-    tau = 0.08
+    h = 0.4
+    d = 6
+    tau = 0.025
     iterations = 500
     I = 500
     y0 = np.random.uniform(-2, 2, I)
@@ -356,7 +358,7 @@ def compare_methods():
     return adam_res, vanilla_res
 
 
-#adam_res, vanilla_res = compare_methods()
+adam_res, vanilla_res = compare_methods()
 
 
 def test_data_points():
