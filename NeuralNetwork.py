@@ -32,7 +32,6 @@ class NeuralNetwork():
             self.scale_input()
         self.embed()
 
-
     def embed(self):
         """Embed starting values into a higher dimension"""
         y = np.zeros(shape=(self.d, self.I))
@@ -181,7 +180,6 @@ class NeuralNetwork():
         plt.grid(True)
         plt.xlabel("Iterations")
         plt.ylabel(r'$J(\theta)$')
-        plt.show()
 
     def train_vanilla(self, iterations):
         """Training the model using the vanilla gradient method"""
@@ -205,7 +203,7 @@ class NeuralNetwork():
         self.cost = np.zeros(iterations)
 
         input = self.y0  # storing the initial input data
-        c_store = self.c # storing the known values
+        c_store = self.c  # storing the known values
 
         m_mu = 0
         v_mu = 0
@@ -303,6 +301,10 @@ class NeuralNetwork():
             A = A + self.h * np.transpose(self.W[k - 1]) @ (
                 self.activation_function_derivated(self.W[k - 1] @ self.Z[k -1]
                 + self.b[k - 1]) * A)
+
+        # Scaling up the solution
+        if self.scale:
+            A = (self.c_b - self.c_a) / (self.beta - self.alpha) * A
         return A[self.d0]
 
 

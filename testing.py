@@ -56,6 +56,7 @@ def test_with_known_functions():
     network.plot_cost()
     plt.grid(True)
     plt.savefig("./plots/cost_func_F(y)_vanilla.pdf", bbox_inches="tight")
+    plt.show()
 
     data = np.random.uniform(-2, 2, I)
     x = np.linspace(-2, 2)
@@ -157,42 +158,46 @@ def test_with_known_functions():
 
 
 def test_method():
+    """Generic test which can me messed around with"""
     def F(y):
         """
         d0:1
         d: 2
         domain: [-2, 2]"""
-        return 1/2 * y**2
-
-    iterations = 1000
-    I = 1000
+        return np.sin(8*y)
+    iterations = 2000
+    I = 4000
     y0 = np.random.uniform(-2, 2, I)
-    K = 20
-    h = 0.07
+    K = 40
+    h = 0.1
     d = 2
     tau = 0.08
+    chunk_size = 100
     c = F(y0)
     c = c.reshape((I, 1))
     network = NeuralNetwork(K, tau, h, y0, d, c, I)
-    # Train the model using the vanilla gradient descent
-    network.train_adams_descent(iterations)
+    # Train the model
+    network.train_stochastic_gradient_descent(iterations, chunk_size)
     # Plot the cost function
     network.plot_cost()
     plt.grid(True)
+    network.scale_up_solution()
 
-    data = np.random.uniform(-2, 2, 20)
-    network.evaluate_data(data)
     x = np.linspace(-2, 2)
     plt.figure()
-    plt.plot(x, F(x), label="Exact solution")
-    plt.scatter(data, network.yps, marker='.', c="r", s=7, label="Model solution")
+    plt.scatter(y0, F(y0), label="Exact solution")
+    plt.scatter(y0, network.yps, marker='.', c="r", s=7, label="Model solution")
     plt.xlabel(r'$y$')
     plt.grid(True)
     plt.show()
 
-def main():
-    test_with_known_functions()
 
+def main():
+    """Generic test which can me messed around with"""
+    # test_method()
+    """Task 1a)
+    Test the model by using the suggested functions"""
+    test_with_known_functions()
 
 
 

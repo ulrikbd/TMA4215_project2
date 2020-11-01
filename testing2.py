@@ -7,14 +7,9 @@ import timeit
 
 plt.style.use('seaborn')
 
-#  Investigate systematically what are optimal choices for K, tau , d, h and any
-#  other choices you need to make. Balance performance in the generalisation
-#  phase with time consumption of training.
-
 
 def test_and_train_adam(network, iterations, I, function):
-    """
-    For a network, train with adam and test it on new data.
+    """For a network, train with adam and test it on new data.
     Returns the residual of the final test on the new data points."""
     network.train_adams_descent(iterations)
     data = np.random.uniform(-2, 2, I)
@@ -24,8 +19,7 @@ def test_and_train_adam(network, iterations, I, function):
     return network.get_average_residual(solution)
 
 def test_and_train_adam_2d(network, iterations, I, function):
-    """
-    For a network, train with adam and test it on new data.
+    """For a network, train with adam and test it on new data.
     Returns the residual of the final test on the new data points."""
     network.train_adams_descent(iterations)
     data1 = np.random.uniform(-2, 2, I)
@@ -38,8 +32,7 @@ def test_and_train_adam_2d(network, iterations, I, function):
 
 
 def test_and_train_vanilla(network, iterations, I, function):
-    """
-    For a network, train with vanilla and test it on new data.
+    """For a network, train with vanilla and test it on new data.
     Returns the residual of the final test on the new data points."""
     network.train_vanilla(iterations)
     data = np.random.uniform(-2, 2, I)
@@ -49,8 +42,7 @@ def test_and_train_vanilla(network, iterations, I, function):
     return network.get_average_residual(solution)
 
 def test_and_train_vanilla_2d(network, iterations, I, function):
-    """
-    For a network, train with vanilla and test it on new data.
+    """For a network, train with vanilla and test it on new data.
     Returns the residual of the final test on the new data points."""
     network.train_vanilla(iterations)
     data1 = np.random.uniform(-2, 2, I)
@@ -61,7 +53,7 @@ def test_and_train_vanilla_2d(network, iterations, I, function):
     solution = solution.reshape((I, 1))
     return network.get_average_residual(solution)
 
-
+"""Functions"""
 def F(y):
     return 1/2 * y**2
 
@@ -77,14 +69,14 @@ def H(y):
 def S(y):
     return -(1 / (np.sqrt(y[0]**2 + y[1]**2)))
 
+
 """
 SYSTEMATIC TEST
 """
 
 
 def test_K(K_vector, tau, h, y0, d, c, I, iterations, method, function):
-    """
-    Fix all parameters but th enumer of hidden layers, K. Let K take values from a range,
+    """Fix all parameters but the number of hidden layers, K. Let K take values from a range,
     and train and test network using the different number of hidden layers. Measure the
     run time for each value of K."""
     cost_vec = np.zeros(len(K_vector))
@@ -102,8 +94,7 @@ def test_K(K_vector, tau, h, y0, d, c, I, iterations, method, function):
 
 
 def test_tau(K, tau_vector, h, y0, d, c, I, iterations, method, function):
-    """
-    Fix all parameters but the learning parameter, tau. Let tau take values from a range,
+    """Fix all parameters but the learning parameter, tau. Let tau take values from a range,
     and train and test network using the different learning parameters. Measure the
     run time for each value of tau."""
     cost_vec =  np.zeros(len(tau_vector))
@@ -121,8 +112,7 @@ def test_tau(K, tau_vector, h, y0, d, c, I, iterations, method, function):
 
 
 def test_h(K, tau, h_vector, y0, d, c, I, iterations, method, function):
-    """
-    Fix all parameters but the step lenght, h. Let h take values from a range,
+    """Fix all parameters but the step lenght, h. Let h take values from a range,
     and train and test network using the different step lengths. Measure the
     run time for each value of h."""
     cost_vec =  np.zeros(len(h_vector))
@@ -140,8 +130,7 @@ def test_h(K, tau, h_vector, y0, d, c, I, iterations, method, function):
 
 
 def test_d(K, tau, h, y0, d_vector, c, I, iterations, method, function):
-    """
-    Fix all parameters but the dimension. Let d take values from a range,
+    """Fix all parameters but the dimension. Let d take values from a range,
     and train and test network using the different dimensions. Measure the
     run time for each value of d."""
     cost_vec =  np.zeros(len(d_vector))
@@ -159,8 +148,7 @@ def test_d(K, tau, h, y0, d_vector, c, I, iterations, method, function):
 
 
 def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time, KH_cost, KH_time, KS_cost, KS_time, names):
-    """
-    Plot the result from test_K() for both F(y) and G(y). """
+    """Plot the result from test_K() for both F(y) and G(y). """
     plt.plot(K_vec, KF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(K_vec, KG_cost, label=r'$G(y)=1-\cos(y)$')
     plt.plot(K_vec, KH_cost, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
@@ -185,8 +173,7 @@ def plot_K(K_vec, KF_cost, KF_time, KG_cost, KG_time, KH_cost, KH_time, KS_cost,
 
 
 def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time, tauH_cost, tauH_time, tauS_cost, tauS_time, names):
-    """
-    Plot the result from test_tau() for both F(y) and G(y). """
+    """Plot the result from test_tau() for both F(y) and G(y). """
     plt.plot(tau_vec, tauF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(tau_vec, tauG_cost, label=r'$G(y)=1-\cos(y)$')
     plt.plot(tau_vec, tauH_cost, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
@@ -211,8 +198,7 @@ def plot_tau(tau_vec, tauF_cost, tauF_time, tauG_cost, tauG_time, tauH_cost, tau
 
 
 def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time, dH_cost, dH_time, dS_cost, dS_time, names):
-    """
-    Plot the result from test_d() for both F(y) and G(y). """
+    """Plot the result from test_d() for both F(y) and G(y). """
     plt.plot(d_vec, dF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(d_vec, dG_cost, label=r'$G(y)=1-\cos(y)$')
     plt.plot(d_vec, dH_cost, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
@@ -237,8 +223,7 @@ def plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time, dH_cost, dH_time, dS_cost,
 
 
 def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time, hH_cost, hH_time, hS_cost, hS_time, names):
-    """
-    Plot the result from test_h() for both F(y) and G(y). """
+    """Plot the result from test_h() for both F(y) and G(y). """
     plt.plot(h_vec, hF_cost, label=r'$F(y)=\frac{1}{2}y^{2}$')
     plt.plot(h_vec, hG_cost, label=r'$G(y)=1-\cos(y)$')
     plt.plot(h_vec, hH_cost, label=r'$H(y)=\frac{1}{2}(y_{1}^{2} + y_{2}^{2})$')
@@ -262,10 +247,9 @@ def plot_h(h_vec, hF_cost, hF_time, hG_cost, hG_time, hH_cost, hH_time, hS_cost,
     plt.show()
 
 
-# Testing different values for the parameters and evaluating run time
 def test_parameters(method, method2d, names):
-    """
-    Create a network and plot the results using functions above."""
+    """Using the functions above, the networks parameters are systematically
+    tested on different combinations of parameters. Also plotted """
     # Fixed values
     K = 12
     h = 0.4
@@ -318,14 +302,10 @@ def test_parameters(method, method2d, names):
     plot_d(d_vec, dF_cost, dF_time, dG_cost, dG_time, dH_cost, dH_time, dS_cost, dS_time, names)
 
 
-def save_figs():
-    names_adam = ["./plots/ares_K_adam.pdf", "./plots/rtime_K_adam.pdf", "./plots/ares_tau_adam.pdf", "./plots/rtime_tau_adam.pdf", "./plots/ares_d_adam.pdf", "./plots/rtime_d_adam.pdf", "./plots/ares_h_adam.pdf", "./plots/rtime_h_adam.pdf"]
-    names_vanilla = ["./plots/ares_K.pdf", "./plots/rtime_K.pdf", "./plots/ares_tau.pdf", "./plots/rtime_tau.pdf", "./plots/ares_d.pdf", "./plots/rtime_d.pdf", "./plots/ares_h.pdf", "./plots/rtime_h.pdf"]
-    test_parameters(test_and_train_vanilla, test_and_train_vanilla_2d,  names_vanilla)
-    test_parameters(test_and_train_adam, test_and_train_adam_2d, names_adam)
-
-
 def compare_methods():
+    """Trains one network with Vanilla gradient method and one with
+    Adam gradient decend and compare convergence. Also returns the
+    average residuals for a test of both networks on the same test data."""
     K = 10
     h = 0.4
     d = 6
@@ -358,10 +338,9 @@ def compare_methods():
     return adam_res, vanilla_res
 
 
-adam_res, vanilla_res = compare_methods()
-
-
 def test_data_points():
+    """Compares average residual and run time obtained with different number
+    of data points. The other paraemeters are held unchanged. """
     K = 10
     h = 0.2
     d = 4
@@ -400,17 +379,20 @@ def test_data_points():
     plt.show()
 
 
-#test_data_points()
-
-
 """
 RANDOM TEST 
+The functions below: random_test(), fixed_test(), n_random_test(), 
+print_random_test() and test_random_parameters() are not used in the rapport. 
+The idéa was that the test above never vary more then one parameter at a time
+due to run time, so this test will randomly select parameter values and combine 
+then to create a network which is then analyzed for performance. This test did not 
+lead to groundbreaking discoveries, but helped our intuition on which parameters 
+to chose.
 """
 
 
 def random_test( y0, c, I, iterations, method):
-    """
-    Generate random values for the parameters and create a neural network.
+    """Generate random values for the parameters and create a neural network.
     test and train the network and calculate the belonging average residual. """
     random_K = random.randint(10, 17)
     random_tau = round(random.uniform( 0.01, 0.9), 2)
@@ -422,8 +404,7 @@ def random_test( y0, c, I, iterations, method):
 
 
 def fixed_test(K, tau, h, d, method, n):
-    """
-    Create a neural network of given parameter values.
+    """Create a neural network of given parameter values.
     test and train the network and calculate the belonging average residual.
     Use to test a good result from the random tests."""
     iterations = 500
@@ -439,8 +420,8 @@ def fixed_test(K, tau, h, d, method, n):
 
 
 def n_random_test(N, method):
-    """
-    Do n random test using random_test() and store the trials in the array result."""
+    """Do n random test using random_test() and store the trials in the array
+    result which is then returned."""
     iterations = 500
     I = 500
     y0 = np.random.uniform(-2, 2, I)
@@ -460,8 +441,7 @@ def n_random_test(N, method):
 
 
 def print_random_test(result, all, i):
-    """
-    Print either one random_test or all random tests in a array of random tests."""
+    """Print either one random_test or all random tests in a array of random tests."""
     K = result[0, :]
     tau = result[1, :]
     h = result[2, :]
@@ -478,9 +458,8 @@ def print_random_test(result, all, i):
 
 
 def test_random_parameters(method, N):
-    """
-    N random tests for the function F. The best test (lowest average residual) and the worst test
-    (highest average residual) is printed with belonging parameter values."""
+    """N random tests for the function F. The best test (lowest average residual)
+    and the worst test (highest average residual) is printed with belonging parameter values."""
     result = n_random_test(N, method)
     print_random_test(result, True, 0)
 
@@ -493,10 +472,27 @@ def test_random_parameters(method, N):
     print_random_test(result, False, j)
 
 
+def main():
+    names_adam = ["./plots/ares_K_adam.pdf", "./plots/rtime_K_adam.pdf", "./plots/ares_tau_adam.pdf", "./plots/rtime_tau_adam.pdf", "./plots/ares_d_adam.pdf", "./plots/rtime_d_adam.pdf","./plots/ares_h_adam.pdf", "./plots/rtime_h_adam.pdf"]
+    names_vanilla = ["./plots/ares_K.pdf", "./plots/rtime_K.pdf", "./plots/ares_tau.pdf", "./plots/rtime_tau.pdf","./plots/ares_d.pdf", "./plots/rtime_d.pdf", "./plots/ares_h.pdf", "./plots/rtime_h.pdf"]
 
-#print('Adam')
-#test_random_parameters(test_and_train_adam, 200)
+    """Run the test which calculated run time and average 
+    residual for different networks with different combinations
+    of parameters. Using Vanilla gradient method."""
+    # test_parameters(test_and_train_vanilla, test_and_train_vanilla_2d, names_vanilla)
 
-#res = fixed_test(13, 0.45, 0.27, 4, test_and_train_adam, 20)
-#print(np.mean(res))
+    """Run the test which calculated run time and average 
+    residual for different networks with different combinations
+    of parameters. Using Adam gradient decent method."""
+    # test_parameters(test_and_train_adam, test_and_train_adam_2d, names_adam)
 
+    """Compare the Vanilla gradient method and the adam gradient decent method"""
+    # adam_res, vanilla_res = compare_methods()
+    # print('Average residual using Adam:',adam_res, '\nAverage residual using Vanilla:',vanilla_res)
+
+    "Compare average residual and run time for different numbers of data points."
+    # test_data_points()
+
+
+if __name__ == "__main__":
+    main()
